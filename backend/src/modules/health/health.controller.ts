@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import httpStatus from "http-status";
 import type { HealthStatus } from "../../types/api";
 import { isDatabaseConnected } from "../../config/db";
 import { asyncHandler } from "../../lib/async-handler";
@@ -15,6 +16,10 @@ export const getHealth = asyncHandler(
       database: databaseConnected ? "connected" : "disconnected",
     };
 
-    sendSuccess(res, payload, databaseConnected ? 200 : 503);
+    sendSuccess(
+      res,
+      payload,
+      databaseConnected ? httpStatus.OK : httpStatus.SERVICE_UNAVAILABLE,
+    );
   },
 );

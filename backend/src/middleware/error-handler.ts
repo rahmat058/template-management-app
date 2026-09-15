@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status";
 import mongoose from "mongoose";
 import { ZodError } from "zod";
 import { isProduction } from "../config/env";
@@ -22,7 +23,7 @@ export function errorHandler(
   }
 
   if (error instanceof ZodError) {
-    res.status(400).json({
+    res.status(httpStatus.BAD_REQUEST).json({
       error: {
         message: "Request validation failed",
         code: "VALIDATION_ERROR",
@@ -33,7 +34,7 @@ export function errorHandler(
   }
 
   if (error instanceof mongoose.Error.CastError) {
-    res.status(400).json({
+    res.status(httpStatus.BAD_REQUEST).json({
       error: {
         message: "Invalid identifier",
         code: "INVALID_ID",
@@ -44,7 +45,7 @@ export function errorHandler(
   }
 
   if (error instanceof mongoose.Error.ValidationError) {
-    res.status(400).json({
+    res.status(httpStatus.BAD_REQUEST).json({
       error: {
         message: "Database validation failed",
         code: "DB_VALIDATION_ERROR",
@@ -56,7 +57,7 @@ export function errorHandler(
 
   const mongoError = error as { code?: number };
   if (mongoError.code === 11000) {
-    res.status(409).json({
+    res.status(httpStatus.CONFLICT).json({
       error: {
         message: "A template with this name already exists",
         code: "DUPLICATE_KEY",
@@ -70,7 +71,7 @@ export function errorHandler(
 
   console.error(error);
 
-  res.status(500).json({
+  res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
     error: {
       message: isProduction ? "Internal server error" : message,
       code: "INTERNAL_ERROR",

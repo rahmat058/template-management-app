@@ -1,3 +1,5 @@
+import httpStatus from "http-status";
+
 export class AppError extends Error {
   readonly statusCode: number;
   readonly code: string;
@@ -21,18 +23,18 @@ export class AppError extends Error {
 
 export class NotFoundError extends AppError {
   constructor(message = "Resource not found", details?: unknown) {
-    super(404, message, "NOT_FOUND", details);
+    super(httpStatus.NOT_FOUND, message, "NOT_FOUND", details);
   }
 }
 
 export class ValidationError extends AppError {
   constructor(message = "Validation failed", details?: unknown) {
-    super(400, message, "VALIDATION_ERROR", details);
+    super(httpStatus.BAD_REQUEST, message, "VALIDATION_ERROR", details);
   }
 }
 
 export class ConflictError extends AppError {
   constructor(message = "Resource already exists", details?: unknown) {
-    super(409, message, "CONFLICT", details);
+    super(httpStatus.CONFLICT, message, "CONFLICT", details);
   }
 }
