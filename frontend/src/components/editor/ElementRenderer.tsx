@@ -3,7 +3,9 @@
 import { memo } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { useDraggable } from "@dnd-kit/core";
+import { useShallow } from "zustand/react/shallow";
 import { MoveHandle } from "@/components/editor/MoveHandle";
+import { ResizeHandles } from "@/components/editor/ResizeHandles";
 import { ImageElement } from "@/components/elements/ImageElement";
 import { ShapeElement } from "@/components/elements/ShapeElement";
 import { TableElement } from "@/components/elements/TableElement";
@@ -35,6 +37,17 @@ export const ElementRenderer = memo(function ElementRenderer({
     const page = tab.document.pages.find((item) => item.id === pageId);
     return page?.elements.find((item) => item.id === elementId) ?? null;
   });
+  const pageSize = useEditorStore(
+    useShallow((state) => {
+      const tab = state.tabs.find((item) => item.id === state.activeTabId);
+      const page = tab?.document.pages.find((item) => item.id === pageId);
+      if (!page) {
+        return null;
+      }
+
+      return { width: page.width, height: page.height };
+    }),
+  );
   const selected = useEditorStore((state) => {
     const tab = state.tabs.find((item) => item.id === state.activeTabId);
     return tab?.selectedElementId === elementId;
@@ -124,6 +137,19 @@ export const ElementRenderer = memo(function ElementRenderer({
       ) : null}
       {element.type === "image" ? <ImageElement element={element} /> : null}
       {element.type === "shape" ? <ShapeElement element={element} /> : null}
+      {interactive && selected && !element.locked && pageSize ? (
+        <ResizeHandles
+          elementId={element.id}
+          box={{
+            x: element.x,
+            y: element.y,
+            width: element.width,
+            height: element.height,
+          }}
+          pageWidth={pageSize.width}
+          pageHeight={pageSize.height}
+        />
+      ) : null}
     </div>
   );
 });

@@ -55,6 +55,10 @@ interface EditorState {
   selectElement: (elementId: string | null) => void;
   addElement: (element: DocumentElement) => void;
   moveElement: (elementId: string, x: number, y: number) => void;
+  resizeElement: (
+    elementId: string,
+    box: { x: number; y: number; width: number; height: number },
+  ) => void;
   updateElement: (
     elementId: string,
     updater: (element: DocumentElement) => DocumentElement,
@@ -416,6 +420,33 @@ export const useEditorStore = create<EditorState>((set, get) => {
                   y: Math.round(
                     Math.max(0, Math.min(page.height - element.height, y)),
                   ),
+                };
+              }),
+            })),
+        ),
+      }));
+    },
+
+    resizeElement: (elementId, box) => {
+      set((state) => ({
+        tabs: mutateActiveTab(
+          state.tabs,
+          state.activeTabId,
+          `resize:${elementId}`,
+          (tab) =>
+            updateActivePage(tab, (page) => ({
+              ...page,
+              elements: page.elements.map((element) => {
+                if (element.id !== elementId) {
+                  return element;
+                }
+
+                return {
+                  ...element,
+                  x: box.x,
+                  y: box.y,
+                  width: box.width,
+                  height: box.height,
                 };
               }),
             })),
