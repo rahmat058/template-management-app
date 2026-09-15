@@ -1,11 +1,37 @@
-node_modules
-dist
-.next
-.env
-.env.local
-.env*.local
+# root
 atlas-credentials.env
+.DS_Store
 *.log
 *.tsbuildinfo
-.DS_Store
 coverage
+
+# frontend
+frontend/node_modules
+frontend/dist
+frontend/.next
+frontend/.env
+frontend/.env.local
+frontend/.env*.local
+frontend/*.log
+frontend/*.tsbuildinfo
+frontend/.DS_Store
+frontend/coverage
+
+# backend
+backend/node_modules
+backend/dist
+backend/.env
+backend/.env.local
+backend/.env*.local
+backend/*.log
+backend/*.tsbuildinfo
+backend/.DS_Store
+backend/coverage
+
+# lock files
+frontend/package-lock.json
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
+backend/package-lock.json
+backend/yarn.lock
+backend/pnpm-lock.yaml
