@@ -109,8 +109,11 @@ export function SavedTemplates() {
                     {template.name}
                   </h3>
                   <p className="text-[11px] text-muted">
-                    Saved on {format(new Date(template.updatedAt), "yyyy-MM-dd")}{" "}
-                    | {format(new Date(template.updatedAt), "h:mm a")}
+                    Modified {format(new Date(template.updatedAt), "MMM d, yyyy")}{" "}
+                    · {format(new Date(template.updatedAt), "h:mm a")}
+                  </p>
+                  <p className="text-[11px] text-muted">
+                    Created {format(new Date(template.createdAt), "MMM d, yyyy")}
                   </p>
                 </div>
               </div>

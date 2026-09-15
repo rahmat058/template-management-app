@@ -80,6 +80,19 @@ export const api = {
   getHealth: () => request<HealthStatus>("/health"),
   listTemplates: () => request<TemplateSummary[]>("/templates"),
   getTemplate: (id: string) => request<Template>(`/templates/${id}`),
+  getTemplateByName: async (name: string): Promise<Template | null> => {
+    try {
+      return await request<Template>(
+        `/templates/by-name/${encodeURIComponent(name)}`,
+      );
+    } catch (error) {
+      if (error instanceof ApiClientError && error.status === 404) {
+        return null;
+      }
+
+      throw error;
+    }
+  },
   createTemplate: (input: CreateTemplateInput) =>
     request<Template>("/templates", {
       method: "POST",

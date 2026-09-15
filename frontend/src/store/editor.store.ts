@@ -7,6 +7,7 @@ import {
 } from "@/lib/default-document";
 import type { Page } from "@/types/document";
 import type { DocumentElement } from "@/types/element";
+import { DEFAULT_TAB_NAME } from "@/lib/templates";
 import type { Template } from "@/types/template";
 import {
   emptyHistory,
@@ -45,6 +46,7 @@ interface EditorState {
   createTab: (name?: string) => void;
   closeTab: (tabId: string) => void;
   openTemplate: (template: Template) => void;
+  hydrateFromTemplate: (template: Template) => void;
   markSaved: (templateId: string, name: string) => void;
   setMode: (mode: "edit" | "preview") => void;
   setActivePage: (pageId: string) => void;
@@ -64,7 +66,36 @@ interface EditorState {
   redo: () => void;
 }
 
-function createUntitledTab(name = "New-Template", tabId?: string): EditorTab {
+function clonePages(pages: Page[]): Page[] {
+  return structuredClone(pages);
+}
+
+function isPristineUntitledTab(tab: EditorTab): boolean {
+  return (
+    tab.templateId === null && !tab.isDirty && tab.name === DEFAULT_TAB_NAME
+  );
+}
+
+function createTabFromTemplate(template: Template, tabId?: string): EditorTab {
+  const pages = clonePages(template.pages);
+  const firstPage = pages[0];
+
+  return {
+    id: tabId ?? createId("tab"),
+    name: template.name,
+    templateId: template.id,
+    document: {
+      pages,
+      version: template.version,
+    },
+    activePageId: firstPage?.id ?? createId("page"),
+    selectedElementId: null,
+    isDirty: false,
+    history: emptyHistory(),
+  };
+}
+
+function createUntitledTab(name = DEFAULT_TAB_NAME, tabId?: string): EditorTab {
   const pages = createDefaultPages();
   const firstPage = pages[0];
 
@@ -121,7 +152,7 @@ function mutateActiveTab(
 }
 
 export const useEditorStore = create<EditorState>((set, get) => {
-  const initialTab = createUntitledTab("New-Template", "tab-untitled");
+  const initialTab = createUntitledTab(DEFAULT_TAB_NAME, "tab-untitled");
 
   return {
     tabs: [initialTab],
@@ -212,26 +243,39 @@ export const useEditorStore = create<EditorState>((set, get) => {
         return;
       }
 
-      const firstPage = template.pages[0];
-      const tab: EditorTab = {
-        id: createId("tab"),
-        name: template.name,
-        templateId: template.id,
-        document: {
-          pages: template.pages,
-          version: template.version,
-        },
-        activePageId: firstPage?.id ?? createId("page"),
-        selectedElementId: null,
-        isDirty: false,
-        history: emptyHistory(),
-      };
+      const tab = createTabFromTemplate(template);
+      const { tabs } = get();
+      const onlyPristineUntitled =
+        tabs.length === 1 && tabs[0] && isPristineUntitledTab(tabs[0]);
+
+      if (onlyPristineUntitled) {
+        set({
+          tabs: [tab],
+          activeTabId: tab.id,
+          mode: "edit",
+        });
+        return;
+      }
 
       set((state) => ({
         tabs: [...state.tabs, tab],
         activeTabId: tab.id,
         mode: "edit",
       }));
+    },
+
+    hydrateFromTemplate: (template) => {
+      const current = get().getActiveTab();
+      if (current && (current.isDirty || current.templateId)) {
+        return;
+      }
+
+      const tab = createTabFromTemplate(template, "tab-untitled");
+      set({
+        tabs: [tab],
+        activeTabId: tab.id,
+        mode: "edit",
+      });
     },
 
     markSaved: (templateId, name) => {

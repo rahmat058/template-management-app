@@ -2,6 +2,7 @@
 
 import { FileText, Plus, X } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { DEFAULT_TAB_NAME } from "@/lib/templates";
 import { useEditorStore } from "@/store/editor.store";
 
 export function TemplateTabs() {
@@ -51,7 +52,7 @@ export function TemplateTabs() {
       <button
         type="button"
         aria-label="Create new template tab"
-        onClick={() => createTab("New-Template")}
+        onClick={() => createTab(DEFAULT_TAB_NAME)}
         className="flex h-8 w-8 items-center justify-center rounded-[8px] text-muted hover:bg-surface-muted hover:text-foreground"
       >
         <Plus className="h-4 w-4" />
