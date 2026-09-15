@@ -4,7 +4,6 @@ import { Canvas } from "@/components/editor/Canvas";
 import { EditorHeader } from "@/components/editor/EditorHeader";
 import { PreviewMode } from "@/components/editor/PreviewMode";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
-import { SavedTemplates } from "@/components/editor/SavedTemplates";
 import { TemplateTabs } from "@/components/editor/TemplateTabs";
 import { Toolbox } from "@/components/editor/Toolbox";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -31,7 +30,6 @@ export function EditorShell() {
         <Canvas />
         <PropertiesPanel />
       </div>
-      <SavedTemplates />
     </div>
   );
 }

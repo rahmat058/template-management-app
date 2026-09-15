@@ -15,7 +15,7 @@ export const tokens = {
     height: "44px",
   },
   templates: {
-    height: "168px",
+    height: "280px",
   },
   colors: {
     workspace: "#EEF2F6",

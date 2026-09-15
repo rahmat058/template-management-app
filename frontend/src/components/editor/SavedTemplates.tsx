@@ -36,44 +36,46 @@ export function SavedTemplates() {
   };
 
   return (
-    <section className="h-[168px] shrink-0 border-t border-border bg-surface px-4 py-3">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Folder className="h-4 w-4 text-primary" />
-          <div>
+    <section className="flex max-h-[280px] min-h-[168px] shrink-0 flex-col border-t border-border bg-[#F8FBFF] px-3 py-3">
+      <div className="mb-2 flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-start gap-2">
+          <Folder className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          <div className="min-w-0">
             <h2 className="text-[13px] font-semibold text-foreground">
               Saved Templates
             </h2>
-            <p className="text-[11px] text-muted">
+            <p className="text-[11px] leading-4 text-muted">
               Access and manage your saved templates.
             </p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          isLoading={saveTemplate.isPending}
-          onClick={() => saveTemplate.mutate()}
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Save Current as Template
-        </Button>
       </div>
 
+      <Button
+        variant="outline"
+        size="sm"
+        className="mb-2 w-full shrink-0 text-[12px]"
+        isLoading={saveTemplate.isPending}
+        onClick={() => saveTemplate.mutate()}
+      >
+        <Plus className="h-3.5 w-3.5" />
+        Save Current as Template
+      </Button>
+
       {isLoading ? (
-        <div className="flex gap-3 overflow-hidden">
-          {Array.from({ length: 3 }).map((_, index) => (
+        <div className="space-y-2">
+          {Array.from({ length: 2 }).map((_, index) => (
             <div
               key={index}
-              className="h-[88px] w-full max-w-xl shrink-0 animate-pulse rounded-[10px] border border-border bg-surface-muted"
+              className="h-[72px] animate-pulse rounded-[10px] border border-border bg-white"
             />
           ))}
         </div>
       ) : null}
 
       {isError ? (
-        <div className="flex h-[88px] items-center justify-between rounded-[10px] border border-border px-4">
-          <p className="text-[13px] text-muted">
+        <div className="flex flex-col gap-2 rounded-[10px] border border-border bg-white px-3 py-3">
+          <p className="text-[12px] text-muted">
             We couldn&apos;t load your templates.
           </p>
           <Button size="sm" onClick={() => void refetch()}>
@@ -83,8 +85,8 @@ export function SavedTemplates() {
       ) : null}
 
       {!isLoading && !isError && (data?.length ?? 0) === 0 ? (
-        <div className="flex h-[88px] items-center rounded-[10px] border border-dashed border-border px-4">
-          <p className="text-[13px] text-muted">
+        <div className="flex min-h-[72px] items-center rounded-[10px] border border-dashed border-border bg-white px-3">
+          <p className="text-[12px] leading-5 text-muted">
             No saved templates yet. Save your current document to create your
             first reusable template.
           </p>
@@ -92,18 +94,18 @@ export function SavedTemplates() {
       ) : null}
 
       {!isLoading && !isError && data && data.length > 0 ? (
-        <div className="flex gap-3 overflow-x-auto pb-1">
+        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
           {data.map((template) => (
             <article
               key={template.id}
-              className="flex h-[88px] min-w-[420px] flex-1 items-center justify-between rounded-[10px] border border-border bg-surface px-4"
+              className="rounded-[10px] border border-border bg-white px-3 py-2.5"
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-primary/10 text-primary">
+              <div className="flex items-start gap-2">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-primary/10 text-primary">
                   <FileText className="h-4 w-4" />
                 </div>
-                <div>
-                  <h3 className="text-[13px] font-semibold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate text-[13px] font-semibold text-foreground">
                     {template.name}
                   </h3>
                   <p className="text-[11px] text-muted">
@@ -112,8 +114,12 @@ export function SavedTemplates() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button size="sm" onClick={() => void handleOpen(template.id)}>
+              <div className="mt-2 flex items-center justify-end gap-1">
+                <Button
+                  size="sm"
+                  className="h-7 px-2.5 text-[12px]"
+                  onClick={() => void handleOpen(template.id)}
+                >
                   Open
                 </Button>
                 <button

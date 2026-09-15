@@ -47,33 +47,35 @@ export function createTableElement(
     x: 56,
     y: 180,
     width: 682,
-    height: 180,
+    height: 220,
     zIndex: 2,
     locked: false,
     visible: true,
     table: {
-      columns: 4,
-      borderWidth: 1,
-      borderColor: "#D1D5DB",
-      cellPadding: 8,
-      rowSpacing: 0,
+      columns: 5,
+      borderWidth: 0,
+      borderColor: "#D7E6F8",
+      cellPadding: 10,
+      rowSpacing: 6,
       rows: [
         {
           id: createId("row"),
           cells: [
-            { id: createId("cell"), value: "Column 1" },
-            { id: createId("cell"), value: "Column 2" },
-            { id: createId("cell"), value: "Column 3" },
-            { id: createId("cell"), value: "Column 4" },
+            { id: createId("cell"), value: "#" },
+            { id: createId("cell"), value: "Item Detail" },
+            { id: createId("cell"), value: "Qty" },
+            { id: createId("cell"), value: "Unit Price" },
+            { id: createId("cell"), value: "Amount" },
           ],
         },
         {
           id: createId("row"),
           cells: [
-            { id: createId("cell"), value: "" },
-            { id: createId("cell"), value: "" },
-            { id: createId("cell"), value: "" },
-            { id: createId("cell"), value: "" },
+            { id: createId("cell"), value: "1" },
+            { id: createId("cell"), value: "Item" },
+            { id: createId("cell"), value: "1" },
+            { id: createId("cell"), value: "$0.00" },
+            { id: createId("cell"), value: "$0.00" },
           ],
         },
       ],
@@ -147,9 +149,14 @@ export function nextElementOffset(page: Page): { x: number; y: number } {
 }
 
 export function addTableRow(element: TableElement): TableElement {
-  const cells = Array.from({ length: element.table.columns }, () => ({
+  const isIndexed = element.table.rows[0]?.cells[0]?.value.trim() === "#";
+  const nextNumber = isIndexed
+    ? String(Math.max(element.table.rows.length, 1))
+    : "";
+
+  const cells = Array.from({ length: element.table.columns }, (_, index) => ({
     id: createId("cell"),
-    value: "",
+    value: isIndexed && index === 0 ? nextNumber : "",
   }));
 
   return {

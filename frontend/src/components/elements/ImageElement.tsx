@@ -2,6 +2,8 @@
 
 import { memo } from "react";
 import type { ImageElement as ImageElementModel } from "@/types/element";
+import { isCompanyLogo } from "@/lib/company-logo";
+import { cn } from "@/lib/cn";
 
 interface ImageElementProps {
   element: ImageElementModel;
@@ -21,9 +23,13 @@ export const ImageElement = memo(function ImageElement({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      key={element.image.src}
       src={element.image.src}
       alt={element.image.alt ?? ""}
-      className="h-full w-full"
+      className={cn(
+        "h-full w-full",
+        isCompanyLogo(element.id) && "rounded-[12px]",
+      )}
       style={{ objectFit: element.image.objectFit }}
     />
   );

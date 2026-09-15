@@ -1,5 +1,6 @@
 import { A4_PORTRAIT, DOCUMENT_VERSION, type Page } from "@/types/document";
 import type { DocumentElement } from "@/types/element";
+import { COMPANY_LOGO_ID, COMPANY_LOGO_PATH } from "@/lib/company-logo";
 
 export { DOCUMENT_VERSION };
 
@@ -32,8 +33,8 @@ export function createDefaultPages(): Page[] {
 function createDefaultElements(): DocumentElement[] {
   return [
     {
-      id: "shape-logo",
-      type: "shape",
+      id: COMPANY_LOGO_ID,
+      type: "image",
       x: 56,
       y: 44,
       width: 40,
@@ -41,12 +42,10 @@ function createDefaultElements(): DocumentElement[] {
       zIndex: 1,
       locked: false,
       visible: true,
-      shape: {
-        kind: "rectangle",
-        fill: "#2563EB",
-        borderColor: "#2563EB",
-        borderWidth: 0,
-        borderRadius: 12,
+      image: {
+        src: COMPANY_LOGO_PATH,
+        alt: "Company logo",
+        objectFit: "cover",
       },
     },
     {
@@ -207,7 +206,7 @@ function createDefaultElements(): DocumentElement[] {
       x: 56,
       y: 188,
       width: 682,
-      height: 360,
+      height: 400,
       zIndex: 2,
       locked: false,
       visible: true,
@@ -285,7 +284,7 @@ function createDefaultElements(): DocumentElement[] {
       id: "text-notes",
       type: "text",
       x: 56,
-      y: 568,
+      y: 608,
       width: 500,
       height: 20,
       zIndex: 2,

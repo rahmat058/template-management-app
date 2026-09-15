@@ -6,7 +6,11 @@ import { ShapeElement } from "@/components/elements/ShapeElement";
 import { TableElement } from "@/components/elements/TableElement";
 import { TextElement } from "@/components/elements/TextElement";
 import { cn } from "@/lib/cn";
-import { addTableRow } from "@/lib/document-utils";
+import {
+  addTableColumn,
+  addTableRow,
+  deleteTableColumn,
+} from "@/lib/document-utils";
 import { useEditorStore } from "@/store/editor.store";
 
 interface ElementRendererProps {
@@ -39,7 +43,8 @@ export const ElementRenderer = memo(function ElementRenderer({
 
   return (
     <div
-      role={interactive ? "button" : undefined}
+      suppressHydrationWarning
+      role={interactive && element.type !== "table" ? "button" : undefined}
       tabIndex={interactive ? 0 : undefined}
       onClick={(event) => {
         if (!interactive) {
@@ -81,6 +86,16 @@ export const ElementRenderer = memo(function ElementRenderer({
           onAddRow={() => {
             useEditorStore.getState().updateElement(element.id, (current) =>
               current.type === "table" ? addTableRow(current) : current,
+            );
+          }}
+          onAddColumn={() => {
+            useEditorStore.getState().updateElement(element.id, (current) =>
+              current.type === "table" ? addTableColumn(current) : current,
+            );
+          }}
+          onDeleteColumn={() => {
+            useEditorStore.getState().updateElement(element.id, (current) =>
+              current.type === "table" ? deleteTableColumn(current) : current,
             );
           }}
         />

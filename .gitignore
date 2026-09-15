@@ -9,6 +9,8 @@ coverage
 frontend/node_modules
 frontend/dist
 frontend/.next
+frontend/frontend
+frontend/.env
 frontend/.env
 frontend/.env.local
 frontend/.env*.local
@@ -16,6 +18,7 @@ frontend/*.log
 frontend/*.tsbuildinfo
 frontend/.DS_Store
 frontend/coverage
+frontend/.next
 
 # backend
 backend/node_modules
