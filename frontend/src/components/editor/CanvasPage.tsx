@@ -6,17 +6,40 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { useShallow } from "zustand/react/shallow";
 import { ElementRenderer } from "@/components/editor/ElementRenderer";
 import { EditorPointerSensor } from "@/lib/dnd-sensors";
 import { useEditorStore } from "@/store/editor.store";
 import { useUiStore } from "@/store/ui.store";
 
 interface CanvasPageProps {
+  pageId: string;
   interactive: boolean;
 }
 
-export function CanvasPage({ interactive }: CanvasPageProps) {
-  const page = useEditorStore((state) => state.getActivePage());
+export function CanvasPage({ pageId, interactive }: CanvasPageProps) {
+  const pageBox = useEditorStore(
+    useShallow((state) => {
+      const tab = state.tabs.find((item) => item.id === state.activeTabId);
+      const page = tab?.document.pages.find((item) => item.id === pageId);
+      if (!page) {
+        return null;
+      }
+
+      return {
+        width: page.width,
+        height: page.height,
+        background: page.background,
+      };
+    }),
+  );
+  const elementIds = useEditorStore(
+    useShallow((state) => {
+      const tab = state.tabs.find((item) => item.id === state.activeTabId);
+      const page = tab?.document.pages.find((item) => item.id === pageId);
+      return page?.elements.map((element) => element.id) ?? [];
+    }),
+  );
   const selectElement = useEditorStore((state) => state.selectElement);
   const moveElement = useEditorStore((state) => state.moveElement);
   const setActiveTool = useUiStore((state) => state.setActiveTool);
@@ -24,7 +47,7 @@ export function CanvasPage({ interactive }: CanvasPageProps) {
     useSensor(EditorPointerSensor, { activationConstraint: { distance: 6 } }),
   );
 
-  if (!page) {
+  if (!pageBox) {
     return (
       <div className="flex h-[640px] w-[480px] items-center justify-center rounded-[8px] bg-white text-sm text-muted shadow-sm">
         No page selected
@@ -39,7 +62,10 @@ export function CanvasPage({ interactive }: CanvasPageProps) {
     }
 
     const elementId = id.slice("element:".length);
-    const currentPage = useEditorStore.getState().getActivePage();
+    const currentPage = useEditorStore
+      .getState()
+      .getActiveTab()
+      ?.document.pages.find((page) => page.id === pageId);
     const element = currentPage?.elements.find((item) => item.id === elementId);
     if (!element) {
       return;
@@ -57,9 +83,9 @@ export function CanvasPage({ interactive }: CanvasPageProps) {
     <div
       className="relative shrink-0 overflow-hidden rounded-[2px] shadow-[0_18px_50px_rgba(15,23,42,0.12)]"
       style={{
-        width: page.width,
-        height: page.height,
-        background: page.background,
+        width: pageBox.width,
+        height: pageBox.height,
+        background: pageBox.background,
       }}
       onClick={() => {
         if (interactive) {
@@ -68,10 +94,11 @@ export function CanvasPage({ interactive }: CanvasPageProps) {
         }
       }}
     >
-      {page.elements.map((element) => (
+      {elementIds.map((elementId) => (
         <ElementRenderer
-          key={element.id}
-          elementId={element.id}
+          key={elementId}
+          pageId={pageId}
+          elementId={elementId}
           interactive={interactive}
         />
       ))}

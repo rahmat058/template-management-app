@@ -35,6 +35,11 @@ export function useKeyboardShortcuts(): void {
       }
 
       if (event.key === "Escape") {
+        if (useEditorStore.getState().mode === "preview") {
+          useEditorStore.getState().setMode("edit");
+          return;
+        }
+
         useEditorStore.getState().selectElement(null);
         return;
       }

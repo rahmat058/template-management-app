@@ -16,11 +16,13 @@ import { useEditorStore } from "@/store/editor.store";
 import { useUiStore } from "@/store/ui.store";
 
 interface ElementRendererProps {
+  pageId: string;
   elementId: string;
   interactive: boolean;
 }
 
 export const ElementRenderer = memo(function ElementRenderer({
+  pageId,
   elementId,
   interactive,
 }: ElementRendererProps) {
@@ -30,7 +32,7 @@ export const ElementRenderer = memo(function ElementRenderer({
       return null;
     }
 
-    const page = tab.document.pages.find((item) => item.id === tab.activePageId);
+    const page = tab.document.pages.find((item) => item.id === pageId);
     return page?.elements.find((item) => item.id === elementId) ?? null;
   });
   const selected = useEditorStore((state) => {

@@ -1,11 +1,15 @@
 import { useLayoutEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, ApiClientError } from "@/lib/api";
 import { templateKeys } from "@/lib/query-keys";
 import { AUTOLOAD_TEMPLATE_NAME } from "@/lib/templates";
 import { useEditorStore } from "@/store/editor.store";
 
-export function useHydrateTemplate1(): { isReady: boolean } {
+export function useHydrateTemplate1(): {
+  isReady: boolean;
+  error: string | null;
+  retry: () => void;
+} {
   const hydrateFromTemplate = useEditorStore(
     (state) => state.hydrateFromTemplate,
   );
@@ -18,16 +22,25 @@ export function useHydrateTemplate1(): { isReady: boolean } {
   });
 
   useLayoutEffect(() => {
-    if (!query.isFetched || didHydrate.current) {
+    if (!query.isFetched || didHydrate.current || !query.data) {
       return;
     }
 
     didHydrate.current = true;
-
-    if (query.data) {
-      hydrateFromTemplate(query.data);
-    }
+    hydrateFromTemplate(query.data);
   }, [hydrateFromTemplate, query.data, query.isFetched]);
 
-  return { isReady: query.isFetched };
+  const error = query.isError
+    ? query.error instanceof ApiClientError
+      ? query.error.message
+      : "Could not load the saved template."
+    : null;
+
+  return {
+    isReady: query.isFetched,
+    error,
+    retry: () => {
+      void query.refetch();
+    },
+  };
 }

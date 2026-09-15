@@ -6,6 +6,7 @@ import { PreviewMode } from "@/components/editor/PreviewMode";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
 import { TemplateTabs } from "@/components/editor/TemplateTabs";
 import { Toolbox } from "@/components/editor/Toolbox";
+import { Button } from "@/components/ui/Button";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { useHydrateTemplate1 } from "@/hooks/useHydrateTemplate1";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -14,7 +15,7 @@ import { useEditorStore } from "@/store/editor.store";
 export function EditorShell() {
   useKeyboardShortcuts();
   const hasMounted = useHasMounted();
-  const { isReady } = useHydrateTemplate1();
+  const { isReady, error, retry } = useHydrateTemplate1();
   const mode = useEditorStore((state) => state.mode);
 
   if (!hasMounted || !isReady) {
@@ -24,6 +25,7 @@ export function EditorShell() {
   if (mode === "preview") {
     return (
       <div className="flex h-screen flex-col overflow-hidden bg-background">
+        {error ? <HydrationErrorBanner message={error} onRetry={retry} /> : null}
         <PreviewMode />
       </div>
     );
@@ -31,6 +33,7 @@ export function EditorShell() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+      {error ? <HydrationErrorBanner message={error} onRetry={retry} /> : null}
       <EditorHeader />
       <TemplateTabs />
       <div className="flex min-h-0 flex-1">
@@ -38,6 +41,25 @@ export function EditorShell() {
         <Canvas />
         <PropertiesPanel />
       </div>
+    </div>
+  );
+}
+
+function HydrationErrorBanner({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-danger/20 bg-danger/5 px-4 py-2">
+      <p className="text-[12px] text-danger">
+        {message} Showing the default document instead.
+      </p>
+      <Button size="sm" variant="outline" onClick={onRetry}>
+        Try again
+      </Button>
     </div>
   );
 }

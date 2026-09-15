@@ -1,6 +1,7 @@
 "use client";
 
-import { FileText, Download, Eye, Redo2, Save, Undo2 } from "lucide-react";
+import { FileText, Eye, Redo2, Save, Undo2 } from "lucide-react";
+import { DownloadPdfButton } from "@/components/editor/DownloadPdfButton";
 import { Button } from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useSaveTemplate } from "@/hooks/useSaveTemplate";
@@ -100,12 +101,7 @@ export function EditorHeader() {
             Save
           </Button>
         </Tooltip>
-        <Tooltip label="Download PDF">
-          <Button variant="outline" aria-label="Download PDF" disabled>
-            <Download className="h-4 w-4" />
-            Download PDF
-          </Button>
-        </Tooltip>
+        <DownloadPdfButton />
       </div>
     </header>
   );

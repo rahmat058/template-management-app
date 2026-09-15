@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   // Keep tracing/dev output inside this package. The parent git root would
   // otherwise make Next create a nested frontend/frontend folder.
   outputFileTracingRoot: projectRoot,
+  serverExternalPackages: ["@react-pdf/renderer"],
   turbopack: {
     root: projectRoot,
   },
