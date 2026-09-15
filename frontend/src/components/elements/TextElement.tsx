@@ -41,7 +41,7 @@ export const TextElement = memo(function TextElement({
                 : current,
             )
           }
-          className="h-full w-full resize-none bg-transparent outline-none"
+          className="canvas-text-input h-full w-full resize-none overflow-hidden bg-transparent outline-none"
           style={{
             fontFamily: "inherit",
             fontSize: "inherit",

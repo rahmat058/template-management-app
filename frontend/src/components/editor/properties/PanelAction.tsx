@@ -17,7 +17,7 @@ export function PanelAction({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex h-9 items-center justify-center gap-1.5 rounded-[8px] border text-[12px] font-medium",
+        "inline-flex h-9 w-full items-center justify-center gap-2 whitespace-nowrap rounded-[8px] border px-3 text-[12px] font-medium",
         danger
           ? "border-border text-muted hover:border-danger hover:text-danger"
           : "border-primary/20 bg-primary/5 text-primary hover:bg-primary/10",
