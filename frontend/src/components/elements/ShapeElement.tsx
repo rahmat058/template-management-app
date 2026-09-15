@@ -14,13 +14,16 @@ export const ShapeElement = memo(function ShapeElement({
 
   if (shape.kind === "line") {
     return (
-      <div
-        className="h-full w-full"
-        style={{
-          background: shape.fill,
-          borderRadius: shape.borderRadius,
-        }}
-      />
+      <div className="flex h-full w-full items-center">
+        <div
+          className="w-full"
+          style={{
+            height: Math.max(1, shape.borderWidth || 2),
+            background: shape.borderColor || shape.fill,
+            borderRadius: shape.borderRadius,
+          }}
+        />
+      </div>
     );
   }
 

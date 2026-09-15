@@ -224,6 +224,76 @@ export function deleteTableColumn(element: TableElement): TableElement {
   };
 }
 
+export function updateTableCell(
+  element: TableElement,
+  rowId: string,
+  cellId: string,
+  value: string,
+): TableElement {
+  return {
+    ...element,
+    table: {
+      ...element.table,
+      rows: element.table.rows.map((row) =>
+        row.id !== rowId
+          ? row
+          : {
+              ...row,
+              cells: row.cells.map((cell) =>
+                cell.id === cellId ? { ...cell, value } : cell,
+              ),
+            },
+      ),
+    },
+  };
+}
+
+export function hasTableHeader(element: TableElement): boolean {
+  return element.table.rows[0]?.cells[0]?.value.trim() === "#";
+}
+
+export function reorderTableRows(
+  element: TableElement,
+  activeId: string,
+  overId: string,
+): TableElement {
+  const header = hasTableHeader(element);
+  const movable = header ? element.table.rows.slice(1) : element.table.rows;
+  const fromIndex = movable.findIndex((row) => row.id === activeId);
+  const toIndex = movable.findIndex((row) => row.id === overId);
+
+  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+    return element;
+  }
+
+  const next = [...movable];
+  const [moved] = next.splice(fromIndex, 1);
+  if (!moved) {
+    return element;
+  }
+  next.splice(toIndex, 0, moved);
+
+  const numbered = header
+    ? next.map((row, index) => ({
+        ...row,
+        cells: row.cells.map((cell, cellIndex) =>
+          cellIndex === 0 ? { ...cell, value: String(index + 1) } : cell,
+        ),
+      }))
+    : next;
+
+  return {
+    ...element,
+    table: {
+      ...element.table,
+      rows:
+        header && element.table.rows[0]
+          ? [element.table.rows[0], ...numbered]
+          : numbered,
+    },
+  };
+}
+
 export function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
     return false;

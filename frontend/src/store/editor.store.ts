@@ -42,10 +42,12 @@ interface EditorState {
   addPage: () => void;
   selectElement: (elementId: string | null) => void;
   addElement: (element: DocumentElement) => void;
+  moveElement: (elementId: string, x: number, y: number) => void;
   updateElement: (
     elementId: string,
     updater: (element: DocumentElement) => DocumentElement,
   ) => void;
+  updatePage: (updater: (page: Page) => Page) => void;
   removeSelectedElement: () => void;
 }
 
@@ -272,6 +274,31 @@ export const useEditorStore = create<EditorState>((set, get) => {
       get().selectElement(element.id);
     },
 
+    moveElement: (elementId, x, y) => {
+      set((state) => ({
+        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) =>
+          updateActivePage(tab, (page) => ({
+            ...page,
+            elements: page.elements.map((element) => {
+              if (element.id !== elementId) {
+                return element;
+              }
+
+              return {
+                ...element,
+                x: Math.round(
+                  Math.max(0, Math.min(page.width - element.width, x)),
+                ),
+                y: Math.round(
+                  Math.max(0, Math.min(page.height - element.height, y)),
+                ),
+              };
+            }),
+          })),
+        ),
+      }));
+    },
+
     updateElement: (elementId, updater) => {
       set((state) => ({
         tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) =>
@@ -281,6 +308,14 @@ export const useEditorStore = create<EditorState>((set, get) => {
               element.id === elementId ? updater(element) : element,
             ),
           })),
+        ),
+      }));
+    },
+
+    updatePage: (updater) => {
+      set((state) => ({
+        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) =>
+          updateActivePage(tab, updater),
         ),
       }));
     },

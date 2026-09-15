@@ -1,6 +1,13 @@
 "use client";
 
+import {
+  DndContext,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { ElementRenderer } from "@/components/editor/ElementRenderer";
+import { EditorPointerSensor } from "@/lib/dnd-sensors";
 import { useEditorStore } from "@/store/editor.store";
 import { useUiStore } from "@/store/ui.store";
 
@@ -11,7 +18,11 @@ interface CanvasPageProps {
 export function CanvasPage({ interactive }: CanvasPageProps) {
   const page = useEditorStore((state) => state.getActivePage());
   const selectElement = useEditorStore((state) => state.selectElement);
+  const moveElement = useEditorStore((state) => state.moveElement);
   const setActiveTool = useUiStore((state) => state.setActiveTool);
+  const sensors = useSensors(
+    useSensor(EditorPointerSensor, { activationConstraint: { distance: 6 } }),
+  );
 
   if (!page) {
     return (
@@ -21,7 +32,28 @@ export function CanvasPage({ interactive }: CanvasPageProps) {
     );
   }
 
-  return (
+  const handleDragEnd = (event: DragEndEvent) => {
+    const id = String(event.active.id);
+    if (!id.startsWith("element:")) {
+      return;
+    }
+
+    const elementId = id.slice("element:".length);
+    const currentPage = useEditorStore.getState().getActivePage();
+    const element = currentPage?.elements.find((item) => item.id === elementId);
+    if (!element) {
+      return;
+    }
+
+    const zoom = useUiStore.getState().zoom || 1;
+    moveElement(
+      elementId,
+      element.x + event.delta.x / zoom,
+      element.y + event.delta.y / zoom,
+    );
+  };
+
+  const pageNode = (
     <div
       className="relative shrink-0 overflow-hidden rounded-[2px] shadow-[0_18px_50px_rgba(15,23,42,0.12)]"
       style={{
@@ -44,5 +76,15 @@ export function CanvasPage({ interactive }: CanvasPageProps) {
         />
       ))}
     </div>
+  );
+
+  if (!interactive) {
+    return pageNode;
+  }
+
+  return (
+    <DndContext sensors={sensors} autoScroll={false} onDragEnd={handleDragEnd}>
+      {pageNode}
+    </DndContext>
   );
 }
