@@ -1,5 +1,5 @@
 # root
-atlas-credentials.env
+docs/atlas-credentials.env
 .DS_Store
 *.log
 *.tsbuildinfo

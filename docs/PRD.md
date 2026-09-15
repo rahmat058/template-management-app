@@ -427,6 +427,10 @@ Create a template.
 
 Get a template.
 
+`GET /api/templates/by-name/:name`
+
+Get the most recently updated template with that name.
+
 `PATCH /api/templates/:id`
 
 Update a template.
@@ -514,100 +518,101 @@ Backend:
 
 ### Initial Load
 
-- [ ] Application opens with the default template when no saved template exists.
-- [ ] Saved `template1` is loaded automatically after it exists.
+- [x] Application opens with the default template when no saved template exists.
+- [x] Saved `template1` is loaded automatically after it exists.
 
 ### Editor
 
-- [ ] Text can be inserted.
-- [ ] Tables can be inserted.
-- [ ] Images can be inserted.
-- [ ] Shapes can be inserted.
-- [ ] Elements can be selected.
-- [ ] Text properties can be changed.
-- [ ] Table properties can be changed.
+- [x] Text can be inserted.
+- [x] Tables can be inserted.
+- [x] Images can be inserted.
+- [x] Shapes can be inserted.
+- [x] Elements can be selected.
+- [x] Text properties can be changed.
+- [x] Table properties can be changed.
 
 ### Tables
 
-- [ ] Rows can be added.
-- [ ] Rows can be deleted.
-- [ ] Columns can be added.
-- [ ] Columns can be deleted.
-- [ ] Rows can be reordered with `@dnd-kit`.
+- [x] Rows can be added.
+- [x] Rows can be deleted.
+- [x] Columns can be added.
+- [x] Columns can be deleted.
+- [x] Rows can be reordered with `@dnd-kit`.
 
 ### Pages
 
-- [ ] Page thumbnails are visible.
-- [ ] Users can switch pages.
-- [ ] Users can add pages.
+- [x] Page thumbnails are visible.
+- [x] Users can switch pages.
+- [x] Users can add pages.
+- [x] Users can delete pages.
 
 ### Templates
 
-- [ ] User can save the active document.
-- [ ] Saved templates appear in the bottom manager.
-- [ ] User can open a saved template.
-- [ ] Saved timestamps are displayed.
-- [ ] `template1` persists across application restarts.
+- [x] User can save the active document.
+- [x] Saved templates appear in the bottom manager.
+- [x] User can open a saved template.
+- [x] Saved timestamps are displayed.
+- [x] `template1` persists across application restarts.
 
 ### History
 
-- [ ] Undo works.
-- [ ] Redo works.
+- [x] Undo works.
+- [x] Redo works.
 
 ### Output
 
-- [ ] Preview renders the active document.
-- [ ] PDF export reflects the active document state.
+- [x] Preview renders the active document.
+- [x] PDF export reflects the active document state.
 
 ### Quality
 
-- [ ] TypeScript strict mode is enabled.
-- [ ] No `any` types are used.
-- [ ] UI is responsive at practical desktop editor sizes.
-- [ ] Editing interactions do not trigger unnecessary full-canvas rerenders.
+- [x] TypeScript strict mode is enabled.
+- [x] No `any` types are used.
+- [x] UI is responsive at practical desktop editor sizes.
+- [x] Editing interactions do not trigger unnecessary full-canvas rerenders.
 
 ## 13. Development Phases
 
 ### Phase 1 — Foundation
 
-- Next.js App Router setup.
-- Express API.
-- MongoDB/Mongoose.
-- Shared TypeScript document types.
-- Base application shell.
+- [x] Next.js App Router setup.
+- [x] Express API.
+- [x] MongoDB/Mongoose.
+- [x] Shared TypeScript document types.
+- [x] Base application shell.
 
 ### Phase 2 — Editor
 
-- Canvas.
-- Element selection.
-- Text.
-- Table.
-- Image.
-- Shape.
-- Properties panel.
+- [x] Canvas.
+- [x] Element selection.
+- [x] Text.
+- [x] Table.
+- [x] Image.
+- [x] Shape.
+- [x] Properties panel.
 
 ### Phase 3 — Interactions
 
-- Drag/drop.
-- Table row reordering.
-- Dynamic rows/columns.
-- Multi-page support.
-- Undo/redo.
+- [x] Drag/drop.
+- [x] Table row reordering.
+- [x] Dynamic rows/columns.
+- [x] Multi-page support.
+- [x] Undo/redo.
 
 ### Phase 4 — Persistence
 
-- Template CRUD API.
-- TanStack Query integration.
-- Zustand hydration.
-- Saved templates manager.
-- Automatic `template1` loading.
+- [x] Template CRUD API.
+- [x] TanStack Query integration.
+- [x] Zustand hydration.
+- [x] Saved templates manager.
+- [x] Automatic `template1` loading.
 
 ### Phase 5 — Output
 
-- Preview mode.
-- PDF export.
-- Error/loading states.
-- Performance optimization.
+- [x] Preview mode.
+- [x] PDF export.
+- [x] Error/loading states.
+- [x] Performance optimization.
 
 ## 14. Definition of Done
 

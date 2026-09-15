@@ -4,12 +4,19 @@ import * as templateController from "./template.controller";
 import {
   createTemplateBodySchema,
   templateIdParamsSchema,
+  templateNameParamsSchema,
   updateTemplateBodySchema,
 } from "./template.validator";
 
 export const templateRouter = Router();
 
 templateRouter.get("/", templateController.listTemplates);
+
+templateRouter.get(
+  "/by-name/:name",
+  validateRequest({ params: templateNameParamsSchema }),
+  templateController.getTemplateByName,
+);
 
 templateRouter.post(
   "/",

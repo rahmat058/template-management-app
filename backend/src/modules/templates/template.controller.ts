@@ -22,6 +22,13 @@ export const getTemplate = asyncHandler(
   },
 );
 
+export const getTemplateByName = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const template = await templateService.getTemplateByName(req.params.name);
+    sendSuccess(res, template);
+  },
+);
+
 export const createTemplate = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const template = await templateService.createTemplate(

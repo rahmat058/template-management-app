@@ -27,6 +27,18 @@ export async function getTemplateById(id: string): Promise<Template> {
   return toTemplate(document);
 }
 
+export async function getTemplateByName(name: string): Promise<Template> {
+  const document = await TemplateModel.findOne({ name })
+    .sort({ updatedAt: -1 })
+    .exec();
+
+  if (!document) {
+    throw new NotFoundError("Template not found");
+  }
+
+  return toTemplate(document);
+}
+
 export async function createTemplate(
   input: CreateTemplateInput,
 ): Promise<Template> {
