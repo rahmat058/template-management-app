@@ -16,10 +16,7 @@ export function EditorHeader() {
   const mode = useEditorStore((state) => state.mode);
   const setTabName = useEditorStore((state) => state.setTabName);
   const setMode = useEditorStore((state) => state.setMode);
-  const canUndo = useHistoryStore((state) => state.canUndo);
-  const canRedo = useHistoryStore((state) => state.canRedo);
-  const undo = useHistoryStore((state) => state.undo);
-  const redo = useHistoryStore((state) => state.redo);
+  const { canUndo, canRedo, undo, redo } = useHistoryStore();
   const saveStatus = useUiStore((state) => state.saveStatus);
   const saveMessage = useUiStore((state) => state.saveMessage);
   const saveTemplate = useSaveTemplate();

@@ -8,6 +8,14 @@ import {
 import type { Page } from "@/types/document";
 import type { DocumentElement } from "@/types/element";
 import type { Template } from "@/types/template";
+import {
+  emptyHistory,
+  uniqueHistoryKey,
+  undoTab,
+  redoTab,
+  withHistory,
+  type TabHistory,
+} from "@/lib/editor-history";
 
 export interface EditorDocument {
   pages: Page[];
@@ -22,6 +30,7 @@ export interface EditorTab {
   activePageId: string;
   selectedElementId: string | null;
   isDirty: boolean;
+  history: TabHistory;
 }
 
 interface EditorState {
@@ -40,23 +49,27 @@ interface EditorState {
   setMode: (mode: "edit" | "preview") => void;
   setActivePage: (pageId: string) => void;
   addPage: () => void;
+  removePage: (pageId?: string) => void;
   selectElement: (elementId: string | null) => void;
   addElement: (element: DocumentElement) => void;
   moveElement: (elementId: string, x: number, y: number) => void;
   updateElement: (
     elementId: string,
     updater: (element: DocumentElement) => DocumentElement,
+    historyKey?: string,
   ) => void;
   updatePage: (updater: (page: Page) => Page) => void;
   removeSelectedElement: () => void;
+  undo: () => void;
+  redo: () => void;
 }
 
-function createUntitledTab(name = "New-Template"): EditorTab {
+function createUntitledTab(name = "New-Template", tabId?: string): EditorTab {
   const pages = createDefaultPages();
   const firstPage = pages[0];
 
   return {
-    id: createId("tab"),
+    id: tabId ?? createId("tab"),
     name,
     templateId: null,
     document: {
@@ -66,6 +79,7 @@ function createUntitledTab(name = "New-Template"): EditorTab {
     activePageId: firstPage?.id ?? createId("page"),
     selectedElementId: null,
     isDirty: false,
+    history: emptyHistory(),
   };
 }
 
@@ -93,8 +107,21 @@ function updateActivePage(
   };
 }
 
+function mutateActiveTab(
+  tabs: EditorTab[],
+  activeTabId: string,
+  historyKey: string | null,
+  updater: (tab: EditorTab) => EditorTab,
+): EditorTab[] {
+  return replaceActiveTab(tabs, activeTabId, (tab) =>
+    historyKey
+      ? withHistory(tab, `${tab.id}:${historyKey}`, updater)
+      : updater(tab),
+  );
+}
+
 export const useEditorStore = create<EditorState>((set, get) => {
-  const initialTab = createUntitledTab();
+  const initialTab = createUntitledTab("New-Template", "tab-untitled");
 
   return {
     tabs: [initialTab],
@@ -197,6 +224,7 @@ export const useEditorStore = create<EditorState>((set, get) => {
         activePageId: firstPage?.id ?? createId("page"),
         selectedElementId: null,
         isDirty: false,
+        history: emptyHistory(),
       };
 
       set((state) => ({
@@ -233,7 +261,11 @@ export const useEditorStore = create<EditorState>((set, get) => {
 
     addPage: () => {
       set((state) => ({
-        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) => {
+        tabs: mutateActiveTab(
+          state.tabs,
+          state.activeTabId,
+          uniqueHistoryKey("add-page", "page"),
+          (tab) => {
           const page = createPage({
             order: tab.document.pages.length,
           });
@@ -252,6 +284,46 @@ export const useEditorStore = create<EditorState>((set, get) => {
       }));
     },
 
+    removePage: (pageId) => {
+      set((state) => ({
+        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) => {
+          if (tab.document.pages.length <= 1) {
+            return tab;
+          }
+
+          const targetId = pageId ?? tab.activePageId;
+          if (!tab.document.pages.some((page) => page.id === targetId)) {
+            return tab;
+          }
+
+          return withHistory(tab, `${tab.id}:remove-page:${targetId}`, (current) => {
+            const remaining = current.document.pages
+              .filter((page) => page.id !== targetId)
+              .map((page, index) => ({ ...page, order: index }));
+            const fallback =
+              remaining.find((page) => page.id === current.activePageId) ??
+              remaining[remaining.length - 1] ??
+              remaining[0];
+
+            if (!fallback) {
+              return current;
+            }
+
+            return {
+              ...current,
+              isDirty: true,
+              activePageId: fallback.id,
+              selectedElementId: null,
+              document: {
+                ...current.document,
+                pages: remaining,
+              },
+            };
+          });
+        }),
+      }));
+    },
+
     selectElement: (elementId) => {
       set((state) => ({
         tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) => ({
@@ -263,58 +335,70 @@ export const useEditorStore = create<EditorState>((set, get) => {
 
     addElement: (element) => {
       set((state) => ({
-        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) =>
-          updateActivePage(tab, (page) => ({
-            ...page,
-            elements: [...page.elements, element],
-          })),
+        tabs: mutateActiveTab(
+          state.tabs,
+          state.activeTabId,
+          `add:${element.id}`,
+          (tab) => ({
+            ...updateActivePage(tab, (page) => ({
+              ...page,
+              elements: [...page.elements, element],
+            })),
+            selectedElementId: element.id,
+          }),
         ),
       }));
-
-      get().selectElement(element.id);
     },
 
     moveElement: (elementId, x, y) => {
       set((state) => ({
-        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) =>
-          updateActivePage(tab, (page) => ({
-            ...page,
-            elements: page.elements.map((element) => {
-              if (element.id !== elementId) {
-                return element;
-              }
+        tabs: mutateActiveTab(
+          state.tabs,
+          state.activeTabId,
+          `move:${elementId}`,
+          (tab) =>
+            updateActivePage(tab, (page) => ({
+              ...page,
+              elements: page.elements.map((element) => {
+                if (element.id !== elementId) {
+                  return element;
+                }
 
-              return {
-                ...element,
-                x: Math.round(
-                  Math.max(0, Math.min(page.width - element.width, x)),
-                ),
-                y: Math.round(
-                  Math.max(0, Math.min(page.height - element.height, y)),
-                ),
-              };
-            }),
-          })),
+                return {
+                  ...element,
+                  x: Math.round(
+                    Math.max(0, Math.min(page.width - element.width, x)),
+                  ),
+                  y: Math.round(
+                    Math.max(0, Math.min(page.height - element.height, y)),
+                  ),
+                };
+              }),
+            })),
         ),
       }));
     },
 
-    updateElement: (elementId, updater) => {
+    updateElement: (elementId, updater, historyKey) => {
       set((state) => ({
-        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) =>
-          updateActivePage(tab, (page) => ({
-            ...page,
-            elements: page.elements.map((element) =>
-              element.id === elementId ? updater(element) : element,
-            ),
-          })),
+        tabs: mutateActiveTab(
+          state.tabs,
+          state.activeTabId,
+          historyKey ?? `element:${elementId}`,
+          (tab) =>
+            updateActivePage(tab, (page) => ({
+              ...page,
+              elements: page.elements.map((element) =>
+                element.id === elementId ? updater(element) : element,
+              ),
+            })),
         ),
       }));
     },
 
     updatePage: (updater) => {
       set((state) => ({
-        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) =>
+        tabs: mutateActiveTab(state.tabs, state.activeTabId, "page", (tab) =>
           updateActivePage(tab, updater),
         ),
       }));
@@ -327,16 +411,29 @@ export const useEditorStore = create<EditorState>((set, get) => {
             return tab;
           }
 
-          return {
-            ...updateActivePage(tab, (page) => ({
+          const selectedId = tab.selectedElementId;
+          return withHistory(tab, `${tab.id}:remove:${selectedId}`, (current) => ({
+            ...updateActivePage(current, (page) => ({
               ...page,
               elements: page.elements.filter(
-                (element) => element.id !== tab.selectedElementId,
+                (element) => element.id !== selectedId,
               ),
             })),
             selectedElementId: null,
-          };
+          }));
         }),
+      }));
+    },
+
+    undo: () => {
+      set((state) => ({
+        tabs: replaceActiveTab(state.tabs, state.activeTabId, undoTab),
+      }));
+    },
+
+    redo: () => {
+      set((state) => ({
+        tabs: replaceActiveTab(state.tabs, state.activeTabId, redoTab),
       }));
     },
   };

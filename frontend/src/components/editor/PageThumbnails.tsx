@@ -1,8 +1,9 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useEditorStore } from "@/store/editor.store";
+import type { Page } from "@/types/document";
 
 export function PageThumbnails() {
   const pages = useEditorStore(
@@ -13,62 +14,103 @@ export function PageThumbnails() {
   );
   const addPage = useEditorStore((state) => state.addPage);
   const setActivePage = useEditorStore((state) => state.setActivePage);
+  const removePage = useEditorStore((state) => state.removePage);
 
   return (
-    <section className="mt-auto border-t border-toolbox-border p-3">
+    <section className="mt-auto flex min-h-0 flex-1 flex-col border-t border-toolbox-border p-3">
       <h2 className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wide text-toolbox-subtle">
         Pages
       </h2>
-      <div className="flex flex-col gap-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
         {pages.map((page, index) => (
-          <button
+          <PageThumbnail
             key={page.id}
-            type="button"
-            onClick={() => setActivePage(page.id)}
-            className={cn(
-              "rounded-[10px] border p-2 text-left transition-colors",
-              page.id === activePageId
-                ? "border-primary bg-primary/20"
-                : "border-toolbox-border hover:bg-toolbox-muted",
-            )}
-          >
-            <div className="relative mb-2 h-[70px] overflow-hidden rounded-[6px] bg-white">
-              <div
-                className="origin-top-left bg-white"
-                style={{
-                  width: page.width,
-                  height: page.height,
-                  transform: `scale(${72 / page.height})`,
-                }}
-              >
-                {page.elements.slice(0, 8).map((element) => (
-                  <div
-                    key={element.id}
-                    className="absolute bg-slate-200"
-                    style={{
-                      left: element.x,
-                      top: element.y,
-                      width: element.width,
-                      height: Math.min(element.height, 48),
-                    }}
-                  />
-                ))}
-              </div>
-              <span className="absolute bottom-1 left-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-semibold text-white">
-                {index + 1}
-              </span>
-            </div>
-          </button>
+            page={page}
+            index={index}
+            active={page.id === activePageId}
+            canDelete={pages.length > 1}
+            onSelect={() => setActivePage(page.id)}
+            onDelete={() => removePage(page.id)}
+          />
         ))}
+      </div>
+      <button
+        type="button"
+        onClick={addPage}
+        className="mt-2 flex h-9 w-full shrink-0 items-center justify-center gap-1.5 rounded-full border border-toolbox-border text-[12px] font-medium text-toolbox-text hover:bg-toolbox-muted"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        Add Page
+      </button>
+    </section>
+  );
+}
+
+function PageThumbnail({
+  page,
+  index,
+  active,
+  canDelete,
+  onSelect,
+  onDelete,
+}: {
+  page: Page;
+  index: number;
+  active: boolean;
+  canDelete: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "group relative rounded-[10px] border p-2 text-left transition-colors",
+        active
+          ? "border-primary bg-primary/20"
+          : "border-toolbox-border hover:bg-toolbox-muted",
+      )}
+    >
+      <button type="button" onClick={onSelect} className="block w-full text-left">
+        <div className="relative mb-2 h-[70px] overflow-hidden rounded-[6px] bg-white">
+          <div
+            className="origin-top-left bg-white"
+            style={{
+              width: page.width,
+              height: page.height,
+              transform: `scale(${72 / page.height})`,
+            }}
+          >
+            {page.elements.slice(0, 8).map((element) => (
+              <div
+                key={element.id}
+                className="absolute bg-slate-200"
+                style={{
+                  left: element.x,
+                  top: element.y,
+                  width: element.width,
+                  height: Math.min(element.height, 48),
+                }}
+              />
+            ))}
+          </div>
+          <span className="absolute bottom-1 left-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-semibold text-white">
+            {index + 1}
+          </span>
+        </div>
+      </button>
+      {canDelete ? (
         <button
           type="button"
-          onClick={addPage}
-          className="flex h-9 w-full items-center justify-center gap-1.5 rounded-full border border-toolbox-border text-[12px] font-medium text-toolbox-text hover:bg-toolbox-muted"
+          aria-label={`Delete page ${index + 1}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete();
+          }}
+          className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-toolbox text-toolbox-subtle hover:bg-danger/20 hover:text-danger"
         >
-          <Plus className="h-3.5 w-3.5" />
-          Add Page
+          <Trash2 className="h-3 w-3" />
         </button>
-      </div>
-    </section>
+      ) : null}
+    </div>
   );
 }

@@ -7,6 +7,7 @@ import { PanelAction } from "@/components/editor/properties/PanelAction";
 import { PositionSizeFields } from "@/components/editor/properties/PositionSizeFields";
 import { SectionTitle } from "@/components/editor/properties/SectionTitle";
 import { toColorInput } from "@/components/editor/properties/color";
+import { uniqueHistoryKey } from "@/lib/editor-history";
 import {
   addTableColumn,
   addTableRow,
@@ -109,8 +110,11 @@ export function TableSettings({ element }: { element: TableElement }) {
             icon={<Plus className="h-3.5 w-3.5" />}
             label="Add Column"
             onClick={() =>
-              updateElement(element.id, (current) =>
-                current.type === "table" ? addTableColumn(current) : current,
+              updateElement(
+                element.id,
+                (current) =>
+                  current.type === "table" ? addTableColumn(current) : current,
+                uniqueHistoryKey("add-column", element.id),
               )
             }
           />
@@ -119,8 +123,11 @@ export function TableSettings({ element }: { element: TableElement }) {
             label="Delete Column"
             danger
             onClick={() =>
-              updateElement(element.id, (current) =>
-                current.type === "table" ? deleteTableColumn(current) : current,
+              updateElement(
+                element.id,
+                (current) =>
+                  current.type === "table" ? deleteTableColumn(current) : current,
+                uniqueHistoryKey("delete-column", element.id),
               )
             }
           />
@@ -137,8 +144,11 @@ export function TableSettings({ element }: { element: TableElement }) {
             icon={<Plus className="h-3.5 w-3.5" />}
             label="Add Row"
             onClick={() =>
-              updateElement(element.id, (current) =>
-                current.type === "table" ? addTableRow(current) : current,
+              updateElement(
+                element.id,
+                (current) =>
+                  current.type === "table" ? addTableRow(current) : current,
+                uniqueHistoryKey("add-row", element.id),
               )
             }
           />
@@ -147,8 +157,11 @@ export function TableSettings({ element }: { element: TableElement }) {
             label="Delete Row"
             danger
             onClick={() =>
-              updateElement(element.id, (current) =>
-                current.type === "table" ? deleteTableRow(current) : current,
+              updateElement(
+                element.id,
+                (current) =>
+                  current.type === "table" ? deleteTableRow(current) : current,
+                uniqueHistoryKey("delete-row", element.id),
               )
             }
           />

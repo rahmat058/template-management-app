@@ -9,10 +9,28 @@ export function useKeyboardShortcuts(): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const isMeta = event.metaKey || event.ctrlKey;
+      const key = event.key.toLowerCase();
 
-      if (isMeta && event.key.toLowerCase() === "s") {
+      if (isMeta && key === "s") {
         event.preventDefault();
         saveTemplate.mutate();
+        return;
+      }
+
+      if (isMeta && key === "z") {
+        event.preventDefault();
+        if (event.shiftKey) {
+          useEditorStore.getState().redo();
+          return;
+        }
+
+        useEditorStore.getState().undo();
+        return;
+      }
+
+      if (isMeta && key === "y") {
+        event.preventDefault();
+        useEditorStore.getState().redo();
         return;
       }
 

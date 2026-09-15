@@ -1,15 +1,16 @@
-import { create } from "zustand";
+import { useEditorStore } from "@/store/editor.store";
 
-interface HistoryState {
-  canUndo: boolean;
-  canRedo: boolean;
-  undo: () => void;
-  redo: () => void;
+export function useHistoryStore() {
+  const canUndo = useEditorStore((state) => {
+    const tab = state.tabs.find((item) => item.id === state.activeTabId);
+    return (tab?.history.past.length ?? 0) > 0;
+  });
+  const canRedo = useEditorStore((state) => {
+    const tab = state.tabs.find((item) => item.id === state.activeTabId);
+    return (tab?.history.future.length ?? 0) > 0;
+  });
+  const undo = useEditorStore((state) => state.undo);
+  const redo = useEditorStore((state) => state.redo);
+
+  return { canUndo, canRedo, undo, redo };
 }
-
-export const useHistoryStore = create<HistoryState>(() => ({
-  canUndo: false,
-  canRedo: false,
-  undo: () => undefined,
-  redo: () => undefined,
-}));

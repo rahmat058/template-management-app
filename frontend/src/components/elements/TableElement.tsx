@@ -35,6 +35,7 @@ import {
   reorderTableRows,
   updateTableCell,
 } from "@/lib/document-utils";
+import { uniqueHistoryKey } from "@/lib/editor-history";
 import { useEditorStore } from "@/store/editor.store";
 
 interface TableElementProps {
@@ -58,10 +59,15 @@ export const TableElement = memo(function TableElement({
     useSensor(EditorPointerSensor, { activationConstraint: { distance: 4 } }),
   );
 
-  const mutate = (updater: (current: TableElementModel) => TableElementModel) => {
+  const mutate = (
+    updater: (current: TableElementModel) => TableElementModel,
+    historyKey?: string,
+  ) => {
     useEditorStore.getState().selectElement(element.id);
-    useEditorStore.getState().updateElement(element.id, (current) =>
-      current.type === "table" ? updater(current) : current,
+    useEditorStore.getState().updateElement(
+      element.id,
+      (current) => (current.type === "table" ? updater(current) : current),
+      historyKey,
     );
   };
 
@@ -71,8 +77,9 @@ export const TableElement = memo(function TableElement({
       return;
     }
 
-    mutate((current) =>
-      reorderTableRows(current, String(active.id), String(over.id)),
+    mutate(
+      (current) => reorderTableRows(current, String(active.id), String(over.id)),
+      uniqueHistoryKey("reorder-row", element.id),
     );
   };
 
@@ -172,8 +179,12 @@ export const TableElement = memo(function TableElement({
       <TableToolbar
         interactive={interactive}
         dragHandleProps={interactive ? dragHandleProps : undefined}
-        onAddColumn={() => mutate(addTableColumn)}
-        onDeleteColumn={() => mutate(deleteTableColumn)}
+        onAddColumn={() =>
+          mutate(addTableColumn, uniqueHistoryKey("add-column", element.id))
+        }
+        onDeleteColumn={() =>
+          mutate(deleteTableColumn, uniqueHistoryKey("delete-column", element.id))
+        }
       />
 
       <div className="min-h-0 flex-1 overflow-auto">
@@ -203,7 +214,7 @@ export const TableElement = memo(function TableElement({
           className="mt-2 inline-flex h-8 items-center justify-center gap-1 self-start rounded-full px-2 text-[12px] font-semibold text-primary hover:bg-primary/5"
           onClick={(event) => {
             event.stopPropagation();
-            mutate(addTableRow);
+            mutate(addTableRow, uniqueHistoryKey("add-row", element.id));
           }}
         >
           <Plus className="h-3.5 w-3.5" />
