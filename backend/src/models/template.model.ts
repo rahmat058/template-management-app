@@ -1,6 +1,6 @@
-import { model, Schema, type Document as MongoDocument } from "mongoose";
 import type { Page } from "../types/document";
 import type { TemplateStatus } from "../types/template";
+import { model, Schema, type Document as MongoDocument } from "mongoose";
 
 const textConfigSchema = new Schema(
   {

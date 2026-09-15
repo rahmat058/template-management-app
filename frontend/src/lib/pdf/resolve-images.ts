@@ -36,15 +36,19 @@ export async function collectPdfImages(
         return [src, src] as const;
       }
 
-      const response = await fetch(toAbsoluteUrl(src));
-      if (!response.ok) {
-        throw new Error("Could not load an image for PDF export.");
-      }
+      try {
+        const response = await fetch(toAbsoluteUrl(src));
+        if (!response.ok) {
+          return [src, ""] as const;
+        }
 
-      const dataUrl = await blobToDataUrl(await response.blob());
-      return [src, dataUrl] as const;
+        const dataUrl = await blobToDataUrl(await response.blob());
+        return [src, dataUrl] as const;
+      } catch {
+        return [src, ""] as const;
+      }
     }),
   );
 
-  return Object.fromEntries(entries);
+  return Object.fromEntries(entries.filter(([, dataUrl]) => Boolean(dataUrl)));
 }

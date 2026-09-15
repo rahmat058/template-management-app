@@ -1,9 +1,10 @@
 "use client";
 
 import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
+import { isIndexedTable } from "@/components/elements/table/table-layout";
+import { isCompanyLogo } from "@/lib/company-logo";
 import { hasTableHeader } from "@/lib/document-utils";
 import { pdfFontFamily } from "@/lib/pdf/pdf-fonts";
-import { isIndexedTable } from "@/components/elements/table/table-layout";
 import type { EditorDocument } from "@/store/editor.store";
 import type { DocumentElement, TableElement } from "@/types/element";
 
@@ -23,16 +24,17 @@ export function TemplatePdfDocument({
       {pages.map((page) => (
         <Page
           key={page.id}
-          wrap={false}
           size={{ width: page.width, height: page.height }}
           style={{ backgroundColor: page.background || "#ffffff" }}
         >
-          {[...page.elements]
-            .filter((element) => element.visible)
-            .sort((left, right) => left.zIndex - right.zIndex)
-            .map((element) => (
-              <PdfElement key={element.id} element={element} images={images} />
-            ))}
+          <View style={{ width: page.width, height: page.height }}>
+            {[...page.elements]
+              .filter((element) => element.visible !== false)
+              .sort((left, right) => left.zIndex - right.zIndex)
+              .map((element) => (
+                <PdfElement key={element.id} element={element} images={images} />
+              ))}
+          </View>
         </Page>
       ))}
     </Document>
@@ -56,7 +58,15 @@ function PdfElement({
 
   if (element.type === "text") {
     return (
-      <View style={box}>
+      <View
+        wrap={false}
+        style={{
+          position: "absolute",
+          left: element.x,
+          top: element.y,
+          width: element.width,
+        }}
+      >
         <Text
           style={{
             fontFamily: pdfFontFamily(
@@ -66,7 +76,7 @@ function PdfElement({
             fontSize: element.text.fontSize,
             color: element.text.color,
             textAlign: element.text.align,
-            lineHeight: 1.4,
+            lineHeight: 1,
           }}
         >
           {element.text.content}
@@ -82,14 +92,16 @@ function PdfElement({
     }
 
     return (
-      <Image
-        src={src}
-        style={{
-          ...box,
-          objectFit: element.image.objectFit,
-          borderRadius: 8,
-        }}
-      />
+      <View style={box}>
+        <Image
+          src={src}
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: isCompanyLogo(element.id) ? 8 : 0,
+          }}
+        />
+      </View>
     );
   }
 

@@ -411,7 +411,7 @@ Do not duplicate the same server state in both TanStack Query and Zustand unless
 
 The editor may hydrate a Zustand editing session from a TanStack Query response, then perform local mutations until the user saves.
 
-## 8. Suggested REST API
+## 8. REST API
 
 ### Templates
 
