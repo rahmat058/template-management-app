@@ -175,13 +175,14 @@ Root — everything delegates to the packages:
 
 Per package:
 
-| Package  | Command                           | Description                   |
-| -------- | --------------------------------- | ----------------------------- |
-| frontend | `npm run dev` / `build` / `start` | Next.js on :3000              |
-| frontend | `npm run typecheck`               | `tsc --noEmit`                |
-| backend  | `npm run dev`                     | nodemon + tsx on :4000        |
-| backend  | `npm run build` / `start`         | Compile to `dist/` and run it |
-| backend  | `npm run typecheck`               | `tsc --noEmit`                |
+| Package  | Command                           | Description                                  |
+| -------- | --------------------------------- | -------------------------------------------- |
+| frontend | `npm run dev` / `build` / `start` | Next.js on :3000                             |
+| frontend | `npm run typecheck`               | `tsc --noEmit`                               |
+| backend  | `npm run dev`                     | nodemon + tsx on :4000                       |
+| backend  | `npm run build` / `start`         | Compile to `dist/` and run it                |
+| backend  | `npm run seed`                    | Clear `templates` and insert the default set |
+| backend  | `npm run typecheck`               | `tsc --noEmit`                               |
 
 ## Commit Conventions
 
@@ -209,11 +210,12 @@ Husky wires three hooks:
 
 ## Troubleshooting
 
-| Symptom                            | Fix                                                                                       |
-| ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| Saved Templates shows an error     | Start the API: `cd backend && npm run dev`                                                |
-| API calls fail with network errors | Check `NEXT_PUBLIC_API_URL` in `frontend/.env.local`, then restart `npm run dev`          |
-| CORS errors in the browser console | `CORS_ORIGIN` in `backend/.env` must equal the frontend origin, usually `:3000`           |
-| `querySrv ECONNREFUSED` on startup | Atlas SRV lookup failed — confirm internet access and allow your IP in Atlas              |
-| `MONGODB_URI is required`          | `backend/.env` is missing or was created outside the `backend` folder                     |
-| Port 3000 or 4000 already in use   | Stop the other process, or change `PORT` and update `CORS_ORIGIN` / `NEXT_PUBLIC_API_URL` |
+| Symptom                             | Fix                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| Saved Templates shows an error      | Start the API: `cd backend && npm run dev`                                                |
+| "Could not load the saved template" | The API is not reachable — `npm run seed` writes to MongoDB but does not start the API    |
+| API calls fail with network errors  | Check `NEXT_PUBLIC_API_URL` in `frontend/.env.local`, then restart `npm run dev`          |
+| CORS errors in the browser console  | `CORS_ORIGIN` in `backend/.env` must equal the frontend origin, usually `:3000`           |
+| `querySrv ECONNREFUSED` on startup  | Atlas SRV lookup failed — confirm internet access and allow your IP in Atlas              |
+| `MONGODB_URI is required`           | `backend/.env` is missing or was created outside the `backend` folder                     |
+| Port 3000 or 4000 already in use    | Stop the other process, or change `PORT` and update `CORS_ORIGIN` / `NEXT_PUBLIC_API_URL` |

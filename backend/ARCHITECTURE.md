@@ -67,13 +67,14 @@ backend/
 │   ├── modules/
 │   │   ├── health/               # routes + controller
 │   │   └── templates/            # routes, controller, service, mapper, validator
+│   ├── seed/                     # default-templates.ts + clear-and-seed runner
 │   ├── routes/index.ts           # /api router
 │   ├── types/                    # document, element, template, api
 │   └── validators/template.schema.ts
 └── dist/                    # tsc output (npm run build)
 ```
 
-`npm run dev` runs nodemon + tsx; `npm run build` emits CommonJS to `dist/`; `npm run start` runs `node dist/server.js`.
+`npm run dev` runs nodemon + tsx; `npm run build` emits CommonJS to `dist/`; `npm run start` runs `node dist/server.js`. `npm run seed` connects, **clears the `templates` collection**, and inserts `src/seed/default-templates.ts` — the default `template1` document the frontend autoload expects. Seeding writes only to MongoDB and does not start the API, which must be running for the editor to fetch the template.
 
 ---
 

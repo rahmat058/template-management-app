@@ -80,11 +80,22 @@ Run the frontend in a **separate terminal** (`cd frontend` then `npm run dev`).
 | `npm run dev`          | Start the API with nodemon + tsx                |
 | `npm run build`        | Compile TypeScript to `dist/`                   |
 | `npm run start`        | Run the compiled server (`node dist/server.js`) |
+| `npm run seed`         | Clear `templates` and insert the default set    |
 | `npm run typecheck`    | Type-check without emitting files               |
 | `npm run lint`         | Run ESLint                                      |
 | `npm run lint:fix`     | ESLint with `--fix`                             |
 | `npm run format`       | Prettier write                                  |
 | `npm run format:check` | Prettier check                                  |
+
+## Seeding
+
+```bash
+npm run seed
+```
+
+The seeder connects with `MONGODB_URI`, **deletes every document in `templates`**, then inserts the default set from `src/seed/default-templates.ts` — currently a single `template1` document that mirrors the editor's default document, so the frontend autoload finds it.
+
+Seeding only writes to MongoDB; it does **not** start the API. The editor loads `template1` over HTTP, so the API must also be running (`npm run dev`) or the frontend will report "Could not load the saved template".
 
 ## API endpoints
 
@@ -131,6 +142,7 @@ src/
 ├── lib/                   AppError, async handler, response helpers
 ├── middleware/            Validation, 404, and error handler
 ├── models/                Mongoose Template schema
+├── seed/                  Default template data + clear-and-seed runner
 ├── modules/
 │   ├── health/            Health route
 │   └── templates/         CRUD controller, service, mapper, routes
