@@ -58,7 +58,9 @@ backend/
 │   ├── lib/
 │   │   ├── app-error.ts     # AppError + NotFound / Validation / Conflict
 │   │   ├── async-handler.ts # forwards async rejections to next()
-│   │   └── http.ts          # sendSuccess / sendNoContent
+│   │   ├── db-retry.ts      # connectDatabase with linear backoff
+│   │   ├── http.ts          # sendSuccess / sendError / sendNoContent
+│   │   └── wait.ts          # setTimeout as a promise
 │   ├── middleware/
 │   │   ├── validate-request.ts   # Zod parse into req.body/params/query
 │   │   ├── not-found.ts          # unmatched route → 404
@@ -94,12 +96,14 @@ All routes mount under `/api`.
 
 Routes are declared so that **`/by-name/:name` precedes `/:id`** — otherwise `/:id` would match the literal `by-name` first and the lookup would fail with an id-cast error.
 
-Responses are always one of two envelopes:
+Responses are always one of two envelopes, both produced by `lib/http.ts`:
 
 ```json
-{ "data": … }
-{ "error": { "message": "…", "code": "…", "details": … } }
+{ "success": true, "data": … }
+{ "success": false, "error": { "message": "…", "code": "…", "details": … } }
 ```
+
+The HTTP status code stays on the status line and is never echoed in the body, so the two cannot drift apart. `204` responses carry no body at all.
 
 ---
 
@@ -184,7 +188,7 @@ Subdocuments all set `{ _id: false }` because elements already carry their own s
 
 `config/db.ts` pins the public resolvers (`8.8.8.8`, `1.1.1.1`) and `ipv4first` before connecting, a workaround for `querySrv ECONNREFUSED` on Atlas SRV lookups. Connections use a 10 s server-selection timeout, pool size 10, and `family: 4`.
 
-`server.ts` retries the initial connection up to **8 times** with a linear backoff (`2 s × attempt`), then closes the HTTP server on `SIGINT`/`SIGTERM` before exiting.
+`lib/db-retry.ts` retries the initial connection up to **8 times** with a linear backoff (`2 s × attempt`) before `server.ts` starts listening; `server.ts` then closes the HTTP server on `SIGINT`/`SIGTERM` before exiting.
 
 ---
 
@@ -213,7 +217,7 @@ Zod constraints mirror the editor's limits — for example `table.rows[].cells.l
 | Layered separation     | controller → service → model | Transport concerns never reach the data layer                        |
 | DTO mapping            | `template.mapper.ts`         | `_id` → `id`, `Date` → ISO string, summary projection                |
 | Error taxonomy         | `lib/app-error.ts`           | Failures carry status, code, and details                             |
-| Single response helper | `lib/http.ts`                | One success/`204` shape across every handler                         |
+| Single response helper | `lib/http.ts`                | One success/error/`204` envelope across every handler                |
 | Async wrapper          | `lib/async-handler.ts`       | Applies catch-all forwarding uniformly                               |
 | Schema-first config    | `config/env.ts`              | Invalid environment fails fast at boot                               |
 

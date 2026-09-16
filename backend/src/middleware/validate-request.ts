@@ -1,6 +1,6 @@
-import type { NextFunction, Request, Response } from 'express'
 import { ZodError, type ZodType } from 'zod'
 import { ValidationError } from '../lib/app-error'
+import type { NextFunction, Request, Response } from 'express'
 
 interface RequestSchema {
   body?: ZodType

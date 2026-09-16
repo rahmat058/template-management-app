@@ -1,12 +1,13 @@
 import cors from 'cors'
-import express from 'express'
-import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
 import morgan from 'morgan'
+import express from 'express'
+import rateLimit from 'express-rate-limit'
+
 import { env } from './config/env'
+import { apiRouter } from './routes'
 import { errorHandler } from './middleware/error-handler'
 import { notFoundHandler } from './middleware/not-found'
-import { apiRouter } from './routes'
 
 export function createApp() {
   const app = express()

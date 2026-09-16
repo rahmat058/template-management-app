@@ -5,7 +5,13 @@ export interface ApiErrorBody {
 }
 
 export interface ApiSuccess<T> {
+  success: true
   data: T
+}
+
+export interface ApiErrorResponse {
+  success: false
+  error: ApiErrorBody
 }
 
 export interface HealthStatus {

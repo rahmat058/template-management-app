@@ -222,7 +222,7 @@ Supporting const tuples: `ELEMENT_TYPES`, `TEXT_ALIGNS`, `IMAGE_OBJECT_FITS`, `S
 
 ### Transport — `api.ts`
 
-`ApiSuccess<T> = { data: T }`, `ApiErrorResponse = { error: { message, code, details? } }`,
+`ApiSuccess<T> = { success: true, data: T }`, `ApiErrorResponse = { success: false, error: { message, code, details? } }`,
 `HealthStatus { status, service, timestamp, database }`.
 
 ---
@@ -404,9 +404,10 @@ All panels commit through `updateElement(id, updater, historyKey?)`.
 Base URL: `process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api"`.
 
 A single internal `request<T>()` helper prefixes the base URL, sets `Content-Type: application/json`,
-returns `undefined` for `204`, unwraps the `{ data }` envelope on success, and throws
+returns `undefined` for `204`, unwraps the `{ success: true, data }` envelope on success (rejecting a
+body without the flag), and throws
 `ApiClientError { message, status, code, details }` parsed from the backend
-`{ error: { message, code, details } }` shape.
+`{ success: false, error: { message, code, details } }` shape.
 
 | `api` method                | HTTP   | Path                                      |
 | --------------------------- | ------ | ----------------------------------------- |

@@ -22,7 +22,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
-  if (!isRecord(value) || !isRecord(value.error)) {
+  if (!isRecord(value) || value.success !== false || !isRecord(value.error)) {
     return false
   }
 
@@ -52,8 +52,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiClientError('Request failed', response.status)
   }
 
-  const success = payload as ApiSuccess<T>
-  return success.data
+  if (!isRecord(payload) || payload.success !== true) {
+    throw new ApiClientError('Malformed response', response.status)
+  }
+
+  return (payload as unknown as ApiSuccess<T>).data
 }
 
 export const api = {

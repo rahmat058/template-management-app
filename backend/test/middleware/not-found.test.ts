@@ -14,6 +14,7 @@ describe('notFoundHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.NOT_FOUND)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: {
         message: 'Route PATCH /api/templates/unknown was not found',
         code: 'ROUTE_NOT_FOUND',

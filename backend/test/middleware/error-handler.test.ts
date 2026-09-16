@@ -56,6 +56,7 @@ describe('errorHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.CONFLICT)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: {
         message: 'A template with this name already exists',
         code: 'CONFLICT',
@@ -79,6 +80,7 @@ describe('errorHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.BAD_REQUEST)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: {
         message: 'Request validation failed',
         code: 'VALIDATION_ERROR',
@@ -94,6 +96,7 @@ describe('errorHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.BAD_REQUEST)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: {
         message: 'Invalid identifier',
         code: 'INVALID_ID',
@@ -111,6 +114,7 @@ describe('errorHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.BAD_REQUEST)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: {
         message: 'Database validation failed',
         code: 'DB_VALIDATION_ERROR',
@@ -127,6 +131,7 @@ describe('errorHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.CONFLICT)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: {
         message: 'A template with this name already exists',
         code: 'DUPLICATE_KEY',
@@ -144,6 +149,7 @@ describe('errorHandler', () => {
     expect(consoleError).toHaveBeenCalledWith(unknown)
     expect(res.status).toHaveBeenCalledWith(httpStatus.INTERNAL_SERVER_ERROR)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: { message: 'database is on fire', code: 'INTERNAL_ERROR' },
     })
   })
@@ -156,6 +162,7 @@ describe('errorHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.INTERNAL_SERVER_ERROR)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: { message: 'Unexpected server error', code: 'INTERNAL_ERROR' },
     })
   })
@@ -169,6 +176,7 @@ describe('errorHandler', () => {
 
     expect(res.status).toHaveBeenCalledWith(httpStatus.INTERNAL_SERVER_ERROR)
     expect(res.json).toHaveBeenCalledWith({
+      success: false,
       error: { message: 'Internal server error', code: 'INTERNAL_ERROR' },
     })
   })

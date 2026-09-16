@@ -100,6 +100,12 @@ describe('createTemplateSchema', () => {
     expect(createTemplateSchema.safeParse(createTemplate({ pages: [createPage([element])] })).success).toBe(false)
   })
 
+  it('rejects an infinite element coordinate', () => {
+    const element = { ...createTextElement(), x: Number.POSITIVE_INFINITY }
+
+    expect(createTemplateSchema.safeParse(createTemplate({ pages: [createPage([element])] })).success).toBe(false)
+  })
+
   it('rejects an unknown element type', () => {
     const element = { ...createTextElement(), type: 'video' }
 
