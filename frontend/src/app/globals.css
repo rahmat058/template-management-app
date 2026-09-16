@@ -58,3 +58,26 @@ button:disabled {
   width: 0;
   height: 0;
 }
+
+@keyframes select-pop {
+  from {
+    transform: scale(0.98);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.select-pop {
+  transform-origin: top;
+  animation: select-pop 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-pop {
+    animation: none;
+  }
+}

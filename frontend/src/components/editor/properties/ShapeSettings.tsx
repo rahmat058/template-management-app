@@ -3,11 +3,17 @@
 import { SHAPE_KINDS, type ShapeElement, type ShapeKind } from '@/types/element'
 import { ColorInput } from '@/components/ui/ColorInput'
 import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/Select'
+import { Select, type SelectOption } from '@/components/ui/Select'
 import { PositionSizeFields } from '@/components/editor/properties/PositionSizeFields'
 import { SectionTitle } from '@/components/editor/properties/SectionTitle'
 import { toColorInput } from '@/components/editor/properties/color'
 import { useEditorStore } from '@/store/editor.store'
+
+const SHAPE_OPTIONS: SelectOption[] = [
+  { value: 'rectangle', label: 'Rectangle' },
+  { value: 'circle', label: 'Circle' },
+  { value: 'line', label: 'Line' },
+]
 
 function toShapeKind(value: string): ShapeKind | null {
   for (const kind of SHAPE_KINDS) {
@@ -24,14 +30,15 @@ export function ShapeSettings({ element }: { element: ShapeElement }) {
 
   return (
     <>
-      <section className="border-border rounded-[12px] border p-3">
+      <section className="border-border rounded-xl border p-3">
         <SectionTitle title="Shape Settings" />
         <div className="mt-3 flex flex-col gap-3">
           <Select
             label="Shape"
             value={element.shape.kind}
-            onChange={(event) => {
-              const kind = toShapeKind(event.target.value)
+            options={SHAPE_OPTIONS}
+            onChange={(value) => {
+              const kind = toShapeKind(value)
               if (!kind) {
                 return
               }
@@ -39,11 +46,8 @@ export function ShapeSettings({ element }: { element: ShapeElement }) {
               updateElement(element.id, (current) =>
                 current.type === 'shape' ? { ...current, shape: { ...current.shape, kind } } : current,
               )
-            }}>
-            <option value="rectangle">Rectangle</option>
-            <option value="circle">Circle</option>
-            <option value="line">Line</option>
-          </Select>
+            }}
+          />
           <div className="grid grid-cols-2 gap-3">
             <ColorInput
               label="Fill"
@@ -117,7 +121,7 @@ export function ShapeSettings({ element }: { element: ShapeElement }) {
           </div>
         </div>
       </section>
-      <section className="border-border rounded-[12px] border p-3">
+      <section className="border-border rounded-xl border p-3">
         <SectionTitle title="Position & Size" />
         <div className="mt-3">
           <PositionSizeFields
