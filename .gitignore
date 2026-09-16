@@ -1,4 +1,5 @@
 # root
+/node_modules
 docs/atlas-credentials.env
 .DS_Store
 *.log
@@ -32,6 +33,9 @@ backend/.DS_Store
 backend/coverage
 
 # lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 frontend/package-lock.json
 frontend/yarn.lock
 frontend/pnpm-lock.yaml
