@@ -1,7 +1,7 @@
 'use client'
 
 import { SlidersHorizontal } from 'lucide-react'
-import { SavedTemplates } from '@/components/editor/SavedTemplates'
+import { isCompanyLogo } from '@/lib/company-logo'
 import { ElementActions } from '@/components/editor/properties/ElementActions'
 import { ImageSettings } from '@/components/editor/properties/ImageSettings'
 import { PageSettings } from '@/components/editor/properties/PageSettings'
@@ -9,7 +9,6 @@ import { ShapeSettings } from '@/components/editor/properties/ShapeSettings'
 import { TableSettings } from '@/components/editor/properties/TableSettings'
 import { TextSettings } from '@/components/editor/properties/TextSettings'
 import { useEditorSelection } from '@/hooks/useEditorSelection'
-import { isCompanyLogo } from '@/lib/company-logo'
 import type { DocumentElement } from '@/types/element'
 
 export function PropertiesPanel() {
@@ -26,7 +25,6 @@ export function PropertiesPanel() {
         {element ? <SelectedElementSettings element={element} /> : <PageSettings />}
         {element ? <ElementActions /> : null}
       </div>
-      <SavedTemplates />
     </aside>
   )
 }

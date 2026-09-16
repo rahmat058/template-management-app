@@ -306,26 +306,26 @@ EditorShell (h-screen flex column)
 ├── TemplateTabs      44px  tab strip with dirty "•" markers and "+" to add a tab
 └── flex-1 row
     ├── Toolbox            240px dark rail: components + PageThumbnails
-    ├── Canvas             flexible: zoom 0.5–1.5 (step 0.1), scaled page(s)
-    └── PropertiesPanel    320px: selected-element settings or PageSettings + SavedTemplates
+    ├── Canvas             flexible: zoom 0.5–1.5 (step 0.1), scaled page(s) + full-width Saved Templates bar
+    └── PropertiesPanel    320px: selected-element settings or PageSettings
 ```
 
-| Component           | Role                                                                                          |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| `EditorShell`       | Layout, hydration gate, preview switch, error banner                                          |
-| `EditorHeader`      | Branding, project-name input, save status, undo/redo, mode toggle, save, PDF                  |
-| `TemplateTabs`      | Per-tab navigation, dirty indicators, close, create                                           |
-| `Toolbox`           | Adds Text / Table / Image / Shape via factories + `nextElementOffset`, hosts `PageThumbnails` |
-| `Canvas`            | Zoom control and page list; delegates to `CanvasPage`                                         |
-| `CanvasPage`        | One page surface; owns the `DndContext` (`EditorPointerSensor`, `distance: 6`)                |
-| `ElementRenderer`   | Memoized dispatcher: positions wrapper, applies drag transform, renders resize handles        |
-| `MoveHandle`        | Grip for text/table drag (those two do **not** drag from the wrapper)                         |
-| `ResizeHandles`     | 8 directional handles driving `applyResize`                                                   |
-| `PageThumbnails`    | Mini page previews (scaled to 72 px height) with select/delete/add                            |
-| `PreviewMode`       | Read-only full-screen canvas (`interactive={false}`) + PDF + back to edit                     |
-| `PropertiesPanel`   | Type-dispatched settings, element actions, saved-template list                                |
-| `SavedTemplates`    | Template list with Open (fetch → `openTemplate`) and confirm-modal Delete                     |
-| `DownloadPdfButton` | Trigger for `useExportPdf`                                                                    |
+| Component           | Role                                                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EditorShell`       | Layout, hydration gate, preview switch, error banner                                                                                        |
+| `EditorHeader`      | Branding, template-name input with undo/redo, save status, mode toggle, save, PDF                                                           |
+| `TemplateTabs`      | Per-tab navigation, dirty indicators, close, create                                                                                         |
+| `Toolbox`           | Adds Text / Table / Image / Shape via factories + `nextElementOffset`, hosts `PageThumbnails`                                               |
+| `Canvas`            | Zoom control, page list, and the floating Saved Templates dock; delegates to `CanvasPage`                                                   |
+| `CanvasPage`        | One page surface; owns the `DndContext` (`EditorPointerSensor`, `distance: 6`)                                                              |
+| `ElementRenderer`   | Memoized dispatcher: positions wrapper, applies drag transform, renders resize handles                                                      |
+| `MoveHandle`        | Grip for text/table drag (those two do **not** drag from the wrapper)                                                                       |
+| `ResizeHandles`     | 8 directional handles driving `applyResize`                                                                                                 |
+| `PageThumbnails`    | Mini page previews (scaled to 72 px height) with select/delete/add                                                                          |
+| `PreviewMode`       | Read-only full-screen canvas (`interactive={false}`) + PDF + back to edit                                                                   |
+| `PropertiesPanel`   | Type-dispatched settings, element actions                                                                                                   |
+| `SavedTemplates`    | Full-width bar docked to the canvas bottom, below the scroll area (edit mode only); Open fetches → `openTemplate`, Delete via confirm modal |
+| `DownloadPdfButton` | Trigger for `useExportPdf`                                                                                                                  |
 
 `Canvas` accepts `{ interactive = true, pageIds? }`, which is what lets `PreviewMode` reuse the exact
 same rendering path with interactions disabled.

@@ -69,10 +69,10 @@ No `any` types.
 │ [thumb]       │                                 │ Borders            │
 │ [thumb]       │                                 │ Padding            │
 │ + Add Page    │                                 │ Row Spacing        │
+│               ├─────────────────────────────────┤                    │
+│               │ Saved Templates    [Card] [Card]│                    │
 │               │                                 │                    │
 ├───────────────┴─────────────────────────────────┴────────────────────┤
-│ Saved Templates                                                       │
-│ [Template Card] [Template Card] [Template Card]                      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -85,7 +85,7 @@ The primary editing experience is desktop-oriented.
 - Left toolbox: ~240px.
 - Center canvas: flexible.
 - Right properties: ~300px.
-- Bottom template manager: fixed/resizable region.
+- Bottom template manager: full-width bar docked to the bottom of the canvas.
 - Header: 56–64px.
 - Tab bar: 40–48px.
 
@@ -408,7 +408,8 @@ Rows
 
 ## 14. Saved Templates Manager
 
-The bottom panel should feel like a lightweight template library.
+The template manager spans the full width of the canvas, docked to its bottom edge below the scroll
+area, and should feel like a lightweight template library.
 
 Card:
 
@@ -754,11 +755,11 @@ The finished UI should feel like a focused document-design workspace:
 │              │                               │               │
 │  Components  │                               │  Properties   │
 │              │        Document Canvas        │               │
-│  Pages       │                               │  Contextual   │
-│              │                               │  Settings     │
+│  Pages       ├───────────────────────────────┤  Contextual   │
+│              │ Saved Templates    [Card]     │  Settings     │
+│              │                               │               │
 │              │                               │               │
 ├──────────────┴───────────────────────────────┴───────────────┤
-│                   Saved Templates                            │
 └──────────────────────────────────────────────────────────────┘
 ```
 
