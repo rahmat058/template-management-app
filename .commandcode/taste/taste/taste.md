@@ -30,3 +30,6 @@
 - Prefers seeding to reset to a known clean state — clear/wipe the collection first, then insert the default data set — rather than idempotent upserts or additive seeding that tolerates pre-existing rows. Confidence: 0.45
 - Wants console/terminal log lines prefixed with a relevant emoji icon per step, including a themed emoji on the completion message (e.g. 🌱 "Seeding complete"). Confidence: 0.55
 - Expects the emoji-iconed log style to be applied consistently across all of an app's console output — server/startup logs (`🔌 Connected to MongoDB`, `🚀 API listening on…`), shutdown/failure/retry lines, and the seed runner — rather than only in the one file just touched. Confidence: 0.5
+- Prefers all test files collected in a single root `test/` directory that mirrors the `src/` layout in subfolders (`test/lib`, `test/middleware`, `test/modules`, `test/seed`, `test/validators`), rather than tests colocated next to the code they cover. Confidence: 0.8
+- Wants the test command to run test suites one by one (sequentially, e.g. Jest `--runInBand`) instead of in parallel workers. Confidence: 0.75
+- Expects the rationale behind non-obvious technical choices to be explained — asks "why did you add this / what's the purpose" for flags and config it didn't request, so changes should come with their purpose, tradeoffs, and how to revert. Confidence: 0.5

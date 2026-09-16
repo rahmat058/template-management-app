@@ -75,17 +75,20 @@ Run the frontend in a **separate terminal** (`cd frontend` then `npm run dev`).
 
 ## Scripts
 
-| Command                | Description                                     |
-| ---------------------- | ----------------------------------------------- |
-| `npm run dev`          | Start the API with nodemon + tsx                |
-| `npm run build`        | Compile TypeScript to `dist/`                   |
-| `npm run start`        | Run the compiled server (`node dist/server.js`) |
-| `npm run seed`         | Clear `templates` and insert the default set    |
-| `npm run typecheck`    | Type-check without emitting files               |
-| `npm run lint`         | Run ESLint                                      |
-| `npm run lint:fix`     | ESLint with `--fix`                             |
-| `npm run format`       | Prettier write                                  |
-| `npm run format:check` | Prettier check                                  |
+| Command                 | Description                                     |
+| ----------------------- | ----------------------------------------------- |
+| `npm run dev`           | Start the API with nodemon + tsx                |
+| `npm run build`         | Compile TypeScript to `dist/`                   |
+| `npm run start`         | Run the compiled server (`node dist/server.js`) |
+| `npm run seed`          | Clear `templates` and insert the default set    |
+| `npm test`              | Run the Jest suite, one test file at a time     |
+| `npm run test:watch`    | Jest in watch mode                              |
+| `npm run test:coverage` | Jest with a V8 coverage report                  |
+| `npm run typecheck`     | Type-check without emitting files               |
+| `npm run lint`          | Run ESLint                                      |
+| `npm run lint:fix`      | ESLint with `--fix`                             |
+| `npm run format`        | Prettier write                                  |
+| `npm run format:check`  | Prettier check                                  |
 
 ## Seeding
 
@@ -96,6 +99,18 @@ npm run seed
 The seeder connects with `MONGODB_URI`, **deletes every document in `templates`**, then inserts the default set from `src/seed/default-templates.ts` — currently a single `template1` document that mirrors the editor's default document, so the frontend autoload finds it.
 
 Seeding only writes to MongoDB; it does **not** start the API. The editor loads `template1` over HTTP, so the API must also be running (`npm run dev`) or the frontend will report "Could not load the saved template".
+
+## Testing
+
+```bash
+npm test                # single run, suites execute one after another
+npm run test:watch      # watch mode
+npm run test:coverage   # writes coverage/ (V8)
+```
+
+Tests live in `test/`, mirroring the `src/` layout — `test/lib`, `test/middleware`, `test/modules`, `test/seed`, `test/validators`. A test for `src/foo/bar.ts` belongs at `test/foo/bar.test.ts`, importing it as `../../src/foo/bar`. They run on Jest with `ts-jest` and `--runInBand`, so the suites run sequentially rather than in parallel workers.
+
+They are pure unit tests — no MongoDB connection is needed, so they run offline. `tsconfig.json` includes both `src` and `test` so `npm run typecheck` also checks the tests, while `tsconfig.build.json` compiles `src` only and keeps the tests out of `dist/`.
 
 ## API endpoints
 
