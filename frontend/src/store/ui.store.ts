@@ -16,7 +16,7 @@ interface UiState {
 export const useUiStore = create<UiState>((set) => ({
   saveStatus: 'idle',
   saveMessage: null,
-  zoom: 0.72,
+  zoom: 1,
   activeTool: 'select',
   setSaveStatus: (status, message = null) => {
     set({ saveStatus: status, saveMessage: message })

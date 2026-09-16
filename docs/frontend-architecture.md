@@ -121,7 +121,7 @@ frontend/
     │   ├── elements/             Text / Table / Image / Shape renderers
     │   │   └── table/            Sortable rows, cell editor, toolbar, layout math
     │   ├── pdf/                  TemplatePdfDocument
-    │   └── ui/                   Button, Input, Select, Modal, Tooltip
+    │   └── ui/                   Button, Input, Select, ColorInput, Modal, Tooltip
     ├── hooks/                    Query/mutation hooks, shortcuts, mount guard
     ├── lib/                      API client, document utils, history, DnD math, tokens
     │   └── pdf/                  Export orchestration, font map, image resolution
@@ -272,7 +272,7 @@ deriving `{ canUndo, canRedo, undo, redo }` from the active tab's history arrays
 ### `ui.store.ts`
 
 Ephemeral view state: `saveStatus` (`idle | saving | saved | error`), `saveMessage`, `zoom`
-(default **0.72**), `activeTool` (`select | text | table | image | shape`).
+(default **1**), `activeTool` (`select | text | table | image | shape`).
 
 ---
 

@@ -2,6 +2,7 @@
 
 import { Columns3, Plus, Rows3, Trash2 } from 'lucide-react'
 import type { TableElement } from '@/types/element'
+import { ColorInput } from '@/components/ui/ColorInput'
 import { Input } from '@/components/ui/Input'
 import { PanelAction } from '@/components/editor/properties/PanelAction'
 import { PositionSizeFields } from '@/components/editor/properties/PositionSizeFields'
@@ -39,9 +40,8 @@ export function TableSettings({ element }: { element: TableElement }) {
               )
             }}
           />
-          <Input
+          <ColorInput
             label="Border color"
-            type="color"
             value={toColorInput(element.table.borderColor)}
             onChange={(event) =>
               updateElement(element.id, (current) =>

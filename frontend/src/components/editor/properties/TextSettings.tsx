@@ -2,6 +2,7 @@
 
 import { AlignCenter, AlignLeft, AlignRight, Type } from 'lucide-react'
 import { FONT_FAMILIES, TEXT_ALIGNS, type TextElement } from '@/types/element'
+import { ColorInput } from '@/components/ui/ColorInput'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { PositionSizeFields } from '@/components/editor/properties/PositionSizeFields'
@@ -78,27 +79,20 @@ export function TextSettings({ element }: { element: TextElement }) {
             <option value="600">Semibold</option>
             <option value="700">Bold</option>
           </Select>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-muted text-[12px] font-medium">Text Color</span>
-            <span className="border-border flex h-9 items-center gap-2 rounded-[8px] border px-2">
-              <input
-                type="color"
-                value={toColorInput(element.text.color)}
-                onChange={(event) =>
-                  updateElement(element.id, (current) =>
-                    current.type === 'text'
-                      ? {
-                          ...current,
-                          text: { ...current.text, color: event.target.value },
-                        }
-                      : current,
-                  )
-                }
-                className="h-5 w-5 cursor-pointer rounded border-0 bg-transparent p-0"
-              />
-              <span className="text-foreground text-[12px]">{element.text.color}</span>
-            </span>
-          </label>
+          <ColorInput
+            label="Text Color"
+            value={toColorInput(element.text.color)}
+            onChange={(event) =>
+              updateElement(element.id, (current) =>
+                current.type === 'text'
+                  ? {
+                      ...current,
+                      text: { ...current.text, color: event.target.value },
+                    }
+                  : current,
+              )
+            }
+          />
         </div>
         <div className="mt-3">
           <p className="text-muted mb-1.5 text-[12px] font-medium">Alignment</p>

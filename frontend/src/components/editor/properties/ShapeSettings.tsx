@@ -1,6 +1,7 @@
 'use client'
 
 import { SHAPE_KINDS, type ShapeElement, type ShapeKind } from '@/types/element'
+import { ColorInput } from '@/components/ui/ColorInput'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { PositionSizeFields } from '@/components/editor/properties/PositionSizeFields'
@@ -44,9 +45,8 @@ export function ShapeSettings({ element }: { element: ShapeElement }) {
             <option value="line">Line</option>
           </Select>
           <div className="grid grid-cols-2 gap-3">
-            <Input
+            <ColorInput
               label="Fill"
-              type="color"
               value={toColorInput(element.shape.fill)}
               onChange={(event) =>
                 updateElement(element.id, (current) =>
@@ -59,9 +59,8 @@ export function ShapeSettings({ element }: { element: ShapeElement }) {
                 )
               }
             />
-            <Input
+            <ColorInput
               label="Border"
-              type="color"
               value={toColorInput(element.shape.borderColor)}
               onChange={(event) =>
                 updateElement(element.id, (current) =>
