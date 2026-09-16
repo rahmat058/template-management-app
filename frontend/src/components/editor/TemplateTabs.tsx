@@ -24,8 +24,8 @@ export function TemplateTabs() {
               className={cn(
                 'flex max-w-56 shrink-0 items-center border-b-2 px-1 transition-colors',
                 active
-                  ? 'border-primary bg-surface text-foreground'
-                  : 'text-muted hover:bg-surface/70 hover:text-foreground border-transparent',
+                  ? 'border-primary bg-surface text-primary'
+                  : 'text-muted hover:bg-primary/10 hover:text-primary border-transparent',
               )}>
               <button
                 type="button"
@@ -39,7 +39,7 @@ export function TemplateTabs() {
                 type="button"
                 aria-label={`Close ${tab.name}`}
                 onClick={() => closeTab(tab.id)}
-                className="text-muted hover:bg-surface-muted hover:text-foreground mr-1 rounded-md p-1">
+                className="text-muted hover:bg-primary/10 hover:text-primary mr-1 rounded-md p-1">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -49,7 +49,7 @@ export function TemplateTabs() {
           type="button"
           aria-label="Create new template tab"
           onClick={() => createTab(DEFAULT_TAB_NAME)}
-          className="text-muted hover:bg-surface hover:text-foreground flex h-8 w-8 shrink-0 items-center justify-center self-center rounded-lg">
+          className="text-muted hover:bg-primary/10 hover:text-primary flex w-11 shrink-0 items-center justify-center transition-colors">
           <Plus className="h-4 w-4" />
         </button>
       </div>
