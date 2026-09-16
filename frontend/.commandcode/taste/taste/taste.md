@@ -1,0 +1,13 @@
+# Taste
+- Wants the root cause explained ("why does this happen") as part of a fix, not just a symptom-level patch or a workaround — expects investigation before/alongside the change. Confidence: 0.55
+- Prefers unnecessary/stray artifacts (generated folders, dup build output) actually removed from the repo, including the workaround ignore entries they spawned, rather than left in place. Confidence: 0.45
+- Prefers project documentation written as markdown files in a `docs/` folder (repo-root, alongside specs like PRD.md), not scattered elsewhere. Confidence: 0.6
+- Prefers the agent to thoroughly analyze the actual project (structure, stack, config, real code) before writing documentation, rather than assuming from spec/design docs. Confidence: 0.5
+- Prefers cross-linking over duplication between docs and agent-config files: docs link to files like AGENTS.md instead of inlining registered/generated content, and the root AGENTS.md points back to the `docs/` markdown files so agents discover them. Confidence: 0.6
+- Uses a consistent git commit-tooling stack across projects — husky + commitlint + commitizen + lint-staged — and expects new repos wired up the same way as existing ones. Confidence: 0.85
+- Prefers emoji-prefixed conventional commits (e.g. `✨ feat: …`, `🐛 fix: …`), enforced so that both commitizen prompts and hand-written commits get the type emoji. Confidence: 0.8
+- In repos where several packages sit under one git root, places the hook tooling at the repo root and uses lint-staged's monorepo pattern (per-package config files) so hooks cover every package. Confidence: 0.5
+- Prettier style: `singleQuote: true`, `semi: false`, `trailingComma: "all"`, `printWidth: 120`, 2-space indent; treats the `.prettierrc` as the source of truth and will reformat the codebase to match it rather than relax the config. Confidence: 0.6
+- Prefers lint/format gates be satisfied honestly: when a hook (e.g. `pre-push`) blocks work, fix the underlying state (reformat the repo) rather than dropping the check or bypassing with `--no-verify`. Confidence: 0.6
+- Prefers keeping git history clean for unpushed commits by amending/rewriting them (e.g. dropping accidentally-committed junk) rather than adding a follow-up cleanup commit. Confidence: 0.55
+- Prefers committing work as separate, scoped commits (e.g. formatting changes kept apart from unrelated file deletions/auto-generated state) rather than lumping everything pending into one commit. Confidence: 0.5

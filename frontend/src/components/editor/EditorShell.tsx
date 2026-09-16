@@ -59,10 +59,10 @@ function HydrationErrorBanner({ message, onRetry }: { message: string; onRetry: 
 function EditorShellFallback() {
   return (
     <div className="bg-background text-foreground flex h-screen flex-col overflow-hidden">
-      <div className="border-border bg-surface h-[60px] border-b" />
-      <div className="border-border bg-surface h-[44px] border-b" />
+      <div className="border-border bg-surface h-15 border-b" />
+      <div className="border-border bg-surface h-11 border-b" />
       <div className="flex min-h-0 flex-1">
-        <div className="bg-toolbox w-[240px] shrink-0" />
+        <div className="bg-toolbox w-60 shrink-0" />
         <div className="bg-surface-muted flex flex-1 items-center justify-center">
           <p className="text-muted text-[13px]">Loading template...</p>
         </div>
