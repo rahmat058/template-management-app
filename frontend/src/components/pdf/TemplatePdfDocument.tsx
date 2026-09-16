@@ -78,6 +78,7 @@ function PdfElement({ element, images }: { element: DocumentElement; images: Rec
 
     return (
       <View style={box}>
+        {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image draws into the PDF, it is not a DOM <img> and takes no alt prop */}
         <Image
           src={src}
           style={{
