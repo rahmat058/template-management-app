@@ -1,21 +1,18 @@
-"use client";
+'use client'
 
-import { memo } from "react";
-import type { TextElement as TextElementModel } from "@/types/element";
-import { useEditorStore } from "@/store/editor.store";
+import { memo } from 'react'
+import type { TextElement as TextElementModel } from '@/types/element'
+import { useEditorStore } from '@/store/editor.store'
 
 interface TextElementProps {
-  element: TextElementModel;
-  interactive: boolean;
+  element: TextElementModel
+  interactive: boolean
 }
 
-export const TextElement = memo(function TextElement({
-  element,
-  interactive,
-}: TextElementProps) {
+export const TextElement = memo(function TextElement({ element, interactive }: TextElementProps) {
   return (
     <div
-      className="h-full w-full overflow-hidden whitespace-pre-wrap break-words"
+      className="h-full w-full overflow-hidden break-words whitespace-pre-wrap"
       style={{
         fontFamily: element.text.fontFamily,
         fontSize: element.text.fontSize,
@@ -23,8 +20,7 @@ export const TextElement = memo(function TextElement({
         color: element.text.color,
         textAlign: element.text.align,
         lineHeight: 1.4,
-      }}
-    >
+      }}>
       {interactive ? (
         <textarea
           data-no-dnd="true"
@@ -33,7 +29,7 @@ export const TextElement = memo(function TextElement({
           onFocus={() => useEditorStore.getState().selectElement(element.id)}
           onChange={(event) =>
             useEditorStore.getState().updateElement(element.id, (current) =>
-              current.type === "text"
+              current.type === 'text'
                 ? {
                     ...current,
                     text: { ...current.text, content: event.target.value },
@@ -43,17 +39,17 @@ export const TextElement = memo(function TextElement({
           }
           className="canvas-text-input h-full w-full resize-none overflow-hidden bg-transparent outline-none"
           style={{
-            fontFamily: "inherit",
-            fontSize: "inherit",
-            fontWeight: "inherit",
-            color: "inherit",
-            textAlign: "inherit",
-            lineHeight: "inherit",
+            fontFamily: 'inherit',
+            fontSize: 'inherit',
+            fontWeight: 'inherit',
+            color: 'inherit',
+            textAlign: 'inherit',
+            lineHeight: 'inherit',
           }}
         />
       ) : (
         element.text.content
       )}
     </div>
-  );
-});
+  )
+})

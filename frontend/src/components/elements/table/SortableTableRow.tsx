@@ -1,21 +1,21 @@
-"use client";
+'use client'
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
-import type { TableCell, TableRow } from "@/types/element";
-import { TableCellEditor } from "@/components/elements/table/TableCellEditor";
-import { scaleDragTransform } from "@/lib/dnd-transform";
-import { useHasMounted } from "@/hooks/useHasMounted";
-import { useUiStore } from "@/store/ui.store";
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { GripVertical } from 'lucide-react'
+import type { TableCell, TableRow } from '@/types/element'
+import { TableCellEditor } from '@/components/elements/table/TableCellEditor'
+import { scaleDragTransform } from '@/lib/dnd-transform'
+import { useHasMounted } from '@/hooks/useHasMounted'
+import { useUiStore } from '@/store/ui.store'
 
 interface TableRowViewProps {
-  row: TableRow;
-  interactive: boolean;
-  isIndexed: boolean;
-  cellPadding: number;
-  onFocus?: () => void;
-  onCellChange: (cellId: string, value: string) => void;
+  row: TableRow
+  interactive: boolean
+  isIndexed: boolean
+  cellPadding: number
+  onFocus?: () => void
+  onCellChange: (cellId: string, value: string) => void
 }
 
 export function SortableTableRow({
@@ -26,13 +26,12 @@ export function SortableTableRow({
   onFocus,
   onCellChange,
 }: TableRowViewProps) {
-  const zoom = useUiStore((state) => state.zoom);
-  const mounted = useHasMounted();
-  const { listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({
-      id: row.id,
-      disabled: !interactive,
-    });
+  const zoom = useUiStore((state) => state.zoom)
+  const mounted = useHasMounted()
+  const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.id,
+    disabled: !interactive,
+  })
 
   return (
     <tr
@@ -41,8 +40,7 @@ export function SortableTableRow({
         transform: CSS.Translate.toString(scaleDragTransform(transform, zoom)),
         transition,
         opacity: isDragging ? 0.65 : 1,
-      }}
-    >
+      }}>
       {interactive ? (
         <td className="w-6 pr-1 align-middle text-[#94A3B8]">
           <span
@@ -52,8 +50,7 @@ export function SortableTableRow({
             suppressHydrationWarning
             className="flex cursor-grab items-center active:cursor-grabbing"
             {...(mounted ? listeners : undefined)}
-            onClick={(event) => event.stopPropagation()}
-          >
+            onClick={(event) => event.stopPropagation()}>
             <GripVertical className="h-3.5 w-3.5" />
           </span>
         </td>
@@ -71,14 +68,14 @@ export function SortableTableRow({
         />
       ))}
     </tr>
-  );
+  )
 }
 
 export function StaticTableRow({
   row,
   isIndexed,
   cellPadding,
-}: Omit<TableRowViewProps, "interactive" | "onCellChange" | "onFocus">) {
+}: Omit<TableRowViewProps, 'interactive' | 'onCellChange' | 'onFocus'>) {
   return (
     <tr>
       {row.cells.map((cell, index) => (
@@ -93,7 +90,7 @@ export function StaticTableRow({
         />
       ))}
     </tr>
-  );
+  )
 }
 
 function TableBodyCell({
@@ -105,27 +102,24 @@ function TableBodyCell({
   onFocus,
   onChange,
 }: {
-  cell: TableCell;
-  index: number;
-  interactive: boolean;
-  isIndexed: boolean;
-  cellPadding: number;
-  onFocus?: () => void;
-  onChange: (value: string) => void;
+  cell: TableCell
+  index: number
+  interactive: boolean
+  isIndexed: boolean
+  cellPadding: number
+  onFocus?: () => void
+  onChange: (value: string) => void
 }) {
-  const isItemDetail = isIndexed && index === 1;
-  const isIndexCell = isIndexed && index === 0;
-  const isNumeric = isIndexed && index > 1;
+  const isItemDetail = isIndexed && index === 1
+  const isIndexCell = isIndexed && index === 0
+  const isNumeric = isIndexed && index > 1
 
   return (
     <td
       className="align-middle"
       style={{
-        padding: isItemDetail
-          ? "0 4px"
-          : `2px ${Math.max(4, cellPadding / 2)}px`,
-      }}
-    >
+        padding: isItemDetail ? '0 4px' : `2px ${Math.max(4, cellPadding / 2)}px`,
+      }}>
       <TableCellEditor
         value={cell.value}
         interactive={interactive}
@@ -136,5 +130,5 @@ function TableBodyCell({
         onChange={onChange}
       />
     </td>
-  );
+  )
 }

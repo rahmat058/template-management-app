@@ -1,16 +1,10 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react'
 
-export function SectionTitle({
-  icon,
-  title,
-}: {
-  icon?: ReactNode;
-  title: string;
-}) {
+export function SectionTitle({ icon, title }: { icon?: ReactNode; title: string }) {
   return (
-    <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+    <div className="text-foreground flex items-center gap-2 text-[13px] font-semibold">
       {icon ? <span className="text-primary">{icon}</span> : null}
       {title}
     </div>
-  );
+  )
 }

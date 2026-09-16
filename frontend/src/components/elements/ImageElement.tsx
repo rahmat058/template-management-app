@@ -1,23 +1,21 @@
-"use client";
+'use client'
 
-import { memo } from "react";
-import type { ImageElement as ImageElementModel } from "@/types/element";
-import { isCompanyLogo } from "@/lib/company-logo";
-import { cn } from "@/lib/cn";
+import { memo } from 'react'
+import type { ImageElement as ImageElementModel } from '@/types/element'
+import { isCompanyLogo } from '@/lib/company-logo'
+import { cn } from '@/lib/cn'
 
 interface ImageElementProps {
-  element: ImageElementModel;
+  element: ImageElementModel
 }
 
-export const ImageElement = memo(function ImageElement({
-  element,
-}: ImageElementProps) {
+export const ImageElement = memo(function ImageElement({ element }: ImageElementProps) {
   if (!element.image.src) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded-[8px] border border-dashed border-border-strong bg-surface-muted text-[12px] text-muted">
-        {element.image.alt || "Image placeholder"}
+      <div className="border-border-strong bg-surface-muted text-muted flex h-full w-full items-center justify-center rounded-[8px] border border-dashed text-[12px]">
+        {element.image.alt || 'Image placeholder'}
       </div>
-    );
+    )
   }
 
   return (
@@ -25,12 +23,9 @@ export const ImageElement = memo(function ImageElement({
     <img
       key={element.image.src}
       src={element.image.src}
-      alt={element.image.alt ?? ""}
-      className={cn(
-        "h-full w-full",
-        isCompanyLogo(element.id) && "rounded-[12px]",
-      )}
+      alt={element.image.alt ?? ''}
+      className={cn('h-full w-full', isCompanyLogo(element.id) && 'rounded-[12px]')}
       style={{ objectFit: element.image.objectFit }}
     />
-  );
-});
+  )
+})

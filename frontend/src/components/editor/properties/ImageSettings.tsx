@@ -1,48 +1,37 @@
-"use client";
+'use client'
 
-import { useState, type ChangeEvent } from "react";
-import {
-  IMAGE_OBJECT_FITS,
-  type DocumentElement,
-  type ImageObjectFit,
-} from "@/types/element";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { ImageAlignControls } from "@/components/editor/properties/ImageAlignControls";
-import { PositionSizeFields } from "@/components/editor/properties/PositionSizeFields";
-import { SectionTitle } from "@/components/editor/properties/SectionTitle";
-import {
-  COMPANY_LOGO_ID,
-  fileToDataUrl,
-  isCompanyLogo,
-  replaceCompanyLogoFile,
-} from "@/lib/company-logo";
-import { useEditorStore } from "@/store/editor.store";
+import { useState, type ChangeEvent } from 'react'
+import { IMAGE_OBJECT_FITS, type DocumentElement, type ImageObjectFit } from '@/types/element'
+import { Input } from '@/components/ui/Input'
+import { Select } from '@/components/ui/Select'
+import { ImageAlignControls } from '@/components/editor/properties/ImageAlignControls'
+import { PositionSizeFields } from '@/components/editor/properties/PositionSizeFields'
+import { SectionTitle } from '@/components/editor/properties/SectionTitle'
+import { COMPANY_LOGO_ID, fileToDataUrl, isCompanyLogo, replaceCompanyLogoFile } from '@/lib/company-logo'
+import { useEditorStore } from '@/store/editor.store'
 
 export function ImageSettings({ element }: { element: DocumentElement }) {
-  const updateElement = useEditorStore((state) => state.updateElement);
-  const [isReplacing, setIsReplacing] = useState(false);
-  const [replaceError, setReplaceError] = useState<string | null>(null);
-  const logo = isCompanyLogo(element.id);
-  const imageSrc = element.type === "image" ? element.image.src : "";
-  const imageAlt =
-    element.type === "image" ? (element.image.alt ?? "") : "Company logo";
-  const objectFit =
-    element.type === "image" ? element.image.objectFit : "cover";
+  const updateElement = useEditorStore((state) => state.updateElement)
+  const [isReplacing, setIsReplacing] = useState(false)
+  const [replaceError, setReplaceError] = useState<string | null>(null)
+  const logo = isCompanyLogo(element.id)
+  const imageSrc = element.type === 'image' ? element.image.src : ''
+  const imageAlt = element.type === 'image' ? (element.image.alt ?? '') : 'Company logo'
+  const objectFit = element.type === 'image' ? element.image.objectFit : 'cover'
 
   const applySrc = (src: string) => {
     updateElement(element.id, (current) => {
-      if (current.type === "image") {
+      if (current.type === 'image') {
         return {
           ...current,
           id: logo ? COMPANY_LOGO_ID : current.id,
           image: { ...current.image, src },
-        };
+        }
       }
 
       return {
         id: logo ? COMPANY_LOGO_ID : current.id,
-        type: "image",
+        type: 'image',
         x: current.x,
         y: current.y,
         width: current.width,
@@ -52,70 +41,62 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
         visible: current.visible,
         image: {
           src,
-          alt: "Company logo",
-          objectFit: "cover",
+          alt: 'Company logo',
+          objectFit: 'cover',
         },
-      };
-    });
-  };
+      }
+    })
+  }
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
+    const file = event.target.files?.[0]
+    event.target.value = ''
 
     if (!file) {
-      return;
+      return
     }
 
-    setReplaceError(null);
-    setIsReplacing(true);
+    setReplaceError(null)
+    setIsReplacing(true)
 
     try {
-      applySrc(await fileToDataUrl(file));
+      applySrc(await fileToDataUrl(file))
 
       if (logo) {
-        await replaceCompanyLogoFile(file);
+        await replaceCompanyLogoFile(file)
       }
     } catch (error) {
-      setReplaceError(
-        error instanceof Error ? error.message : "Could not replace the image.",
-      );
+      setReplaceError(error instanceof Error ? error.message : 'Could not replace the image.')
     } finally {
-      setIsReplacing(false);
+      setIsReplacing(false)
     }
-  };
+  }
 
   return (
     <>
-      <section className="rounded-[12px] border border-border p-3">
-        <SectionTitle title={logo ? "Company Logo" : "Image Settings"} />
+      <section className="border-border rounded-[12px] border p-3">
+        <SectionTitle title={logo ? 'Company Logo' : 'Image Settings'} />
         <div className="mt-3 flex flex-col gap-3">
           <label className="flex flex-col gap-1.5">
-            <span className="text-[12px] font-medium text-muted">
-              {logo ? "Replace logo" : "Replace image"}
-            </span>
+            <span className="text-muted text-[12px] font-medium">{logo ? 'Replace logo' : 'Replace image'}</span>
             <input
               type="file"
               accept="image/*"
               disabled={isReplacing}
               onClick={(event) => event.stopPropagation()}
               onChange={(event) => void handleFileChange(event)}
-              className="block w-full text-[12px] text-muted file:mr-3 file:h-8 file:rounded-[8px] file:border file:border-primary/20 file:bg-primary/5 file:px-3 file:text-[12px] file:font-medium file:text-primary"
+              className="text-muted file:border-primary/20 file:bg-primary/5 file:text-primary block w-full text-[12px] file:mr-3 file:h-8 file:rounded-[8px] file:border file:px-3 file:text-[12px] file:font-medium"
             />
           </label>
-          {isReplacing ? (
-            <p className="text-[12px] text-muted">Replacing image…</p>
-          ) : null}
-          {replaceError ? (
-            <p className="text-[12px] text-danger">{replaceError}</p>
-          ) : null}
+          {isReplacing ? <p className="text-muted text-[12px]">Replacing image…</p> : null}
+          {replaceError ? <p className="text-danger text-[12px]">{replaceError}</p> : null}
           <Input
             label="Image URL"
-            value={imageSrc.startsWith("data:") ? "Uploaded image" : imageSrc}
-            readOnly={imageSrc.startsWith("data:")}
+            value={imageSrc.startsWith('data:') ? 'Uploaded image' : imageSrc}
+            readOnly={imageSrc.startsWith('data:')}
             onChange={(event) => {
-              if (!imageSrc.startsWith("data:")) {
-                applySrc(event.target.value);
+              if (!imageSrc.startsWith('data:')) {
+                applySrc(event.target.value)
               }
             }}
           />
@@ -124,7 +105,7 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
             value={imageAlt}
             onChange={(event) =>
               updateElement(element.id, (current) =>
-                current.type === "image"
+                current.type === 'image'
                   ? {
                       ...current,
                       image: { ...current.image, alt: event.target.value },
@@ -139,7 +120,7 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
             value={objectFit}
             onChange={(event) =>
               updateElement(element.id, (current) =>
-                current.type === "image"
+                current.type === 'image'
                   ? {
                       ...current,
                       image: {
@@ -149,8 +130,7 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
                     }
                   : current,
               )
-            }
-          >
+            }>
             {IMAGE_OBJECT_FITS.map((fit) => (
               <option key={fit} value={fit}>
                 {fit}
@@ -159,7 +139,7 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
           </Select>
         </div>
       </section>
-      <section className="rounded-[12px] border border-border p-3">
+      <section className="border-border rounded-[12px] border p-3">
         <SectionTitle title="Position & Size" />
         <div className="mt-3">
           <PositionSizeFields
@@ -172,5 +152,5 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
         </div>
       </section>
     </>
-  );
+  )
 }

@@ -45,12 +45,12 @@ Keep the backend running in a **separate terminal**. The editor loads locally wi
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the Next.js development server on port 3000 |
-| `npm run build` | Create a production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | Run ESLint |
+| Command         | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `npm run dev`   | Start the Next.js development server on port 3000 |
+| `npm run build` | Create a production build                         |
+| `npm run start` | Serve the production build                        |
+| `npm run lint`  | Run ESLint                                        |
 
 ## Project structure
 

@@ -1,45 +1,45 @@
-import type { Page } from "@/types/document";
+import type { Page } from '@/types/document'
 
-export const MAX_HISTORY = 50;
-export const HISTORY_MERGE_MS = 500;
+export const MAX_HISTORY = 50
+export const HISTORY_MERGE_MS = 500
 
 export interface EditorSnapshot {
-  pages: Page[];
-  activePageId: string;
-  selectedElementId: string | null;
-  isDirty: boolean;
+  pages: Page[]
+  activePageId: string
+  selectedElementId: string | null
+  isDirty: boolean
 }
 
 export interface TabHistory {
-  past: EditorSnapshot[];
-  future: EditorSnapshot[];
+  past: EditorSnapshot[]
+  future: EditorSnapshot[]
 }
 
 interface HistoryOwnedTab {
-  history: TabHistory;
+  history: TabHistory
   document: {
-    pages: Page[];
-    version: number;
-  };
-  activePageId: string;
-  selectedElementId: string | null;
-  isDirty: boolean;
+    pages: Page[]
+    version: number
+  }
+  activePageId: string
+  selectedElementId: string | null
+  isDirty: boolean
 }
 
-let mergeKey: string | null = null;
-let mergeAt = 0;
+let mergeKey: string | null = null
+let mergeAt = 0
 
 export function emptyHistory(): TabHistory {
-  return { past: [], future: [] };
+  return { past: [], future: [] }
 }
 
 export function uniqueHistoryKey(prefix: string, id: string): string {
-  return `${prefix}:${id}:${Date.now()}`;
+  return `${prefix}:${id}:${Date.now()}`
 }
 
 export function resetHistoryMerge(): void {
-  mergeKey = null;
-  mergeAt = 0;
+  mergeKey = null
+  mergeAt = 0
 }
 
 export function takeSnapshot(tab: HistoryOwnedTab): EditorSnapshot {
@@ -48,13 +48,10 @@ export function takeSnapshot(tab: HistoryOwnedTab): EditorSnapshot {
     activePageId: tab.activePageId,
     selectedElementId: tab.selectedElementId,
     isDirty: tab.isDirty,
-  };
+  }
 }
 
-export function applySnapshot<T extends HistoryOwnedTab>(
-  tab: T,
-  snapshot: EditorSnapshot,
-): T {
+export function applySnapshot<T extends HistoryOwnedTab>(tab: T, snapshot: EditorSnapshot): T {
   return {
     ...tab,
     isDirty: snapshot.isDirty,
@@ -64,21 +61,17 @@ export function applySnapshot<T extends HistoryOwnedTab>(
       ...tab.document,
       pages: snapshot.pages,
     },
-  };
+  }
 }
 
-export function withHistory<T extends HistoryOwnedTab>(
-  tab: T,
-  key: string,
-  updater: (tab: T) => T,
-): T {
-  const now = Date.now();
-  const shouldMerge = mergeKey === key && now - mergeAt < HISTORY_MERGE_MS;
-  mergeKey = key;
-  mergeAt = now;
+export function withHistory<T extends HistoryOwnedTab>(tab: T, key: string, updater: (tab: T) => T): T {
+  const now = Date.now()
+  const shouldMerge = mergeKey === key && now - mergeAt < HISTORY_MERGE_MS
+  mergeKey = key
+  mergeAt = now
 
   if (shouldMerge) {
-    return updater(tab);
+    return updater(tab)
   }
 
   return updater({
@@ -87,17 +80,17 @@ export function withHistory<T extends HistoryOwnedTab>(
       past: [...tab.history.past, takeSnapshot(tab)].slice(-MAX_HISTORY),
       future: [],
     },
-  });
+  })
 }
 
 export function undoTab<T extends HistoryOwnedTab>(tab: T): T {
-  const previous = tab.history.past[tab.history.past.length - 1];
+  const previous = tab.history.past[tab.history.past.length - 1]
   if (!previous) {
-    return tab;
+    return tab
   }
 
-  resetHistoryMerge();
-  const current = takeSnapshot(tab);
+  resetHistoryMerge()
+  const current = takeSnapshot(tab)
 
   return {
     ...applySnapshot(tab, previous),
@@ -105,17 +98,17 @@ export function undoTab<T extends HistoryOwnedTab>(tab: T): T {
       past: tab.history.past.slice(0, -1),
       future: [...tab.history.future, current],
     },
-  };
+  }
 }
 
 export function redoTab<T extends HistoryOwnedTab>(tab: T): T {
-  const next = tab.history.future[tab.history.future.length - 1];
+  const next = tab.history.future[tab.history.future.length - 1]
   if (!next) {
-    return tab;
+    return tab
   }
 
-  resetHistoryMerge();
-  const current = takeSnapshot(tab);
+  resetHistoryMerge()
+  const current = takeSnapshot(tab)
 
   return {
     ...applySnapshot(tab, next),
@@ -123,5 +116,5 @@ export function redoTab<T extends HistoryOwnedTab>(tab: T): T {
       past: [...tab.history.past, current],
       future: tab.history.future.slice(0, -1),
     },
-  };
+  }
 }

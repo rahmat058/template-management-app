@@ -1,11 +1,15 @@
-"use client";
+'use client'
 
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore } from 'react'
 
 function subscribe(): () => void {
-  return () => undefined;
+  return () => undefined
 }
 
 export function useHasMounted(): boolean {
-  return useSyncExternalStore(subscribe, () => true, () => false);
+  return useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  )
 }

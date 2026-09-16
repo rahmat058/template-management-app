@@ -1,24 +1,18 @@
-"use client";
+'use client'
 
-import { Input } from "@/components/ui/Input";
-import { useEditorStore } from "@/store/editor.store";
+import { Input } from '@/components/ui/Input'
+import { useEditorStore } from '@/store/editor.store'
 
 interface PositionSizeFieldsProps {
-  elementId: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  elementId: string
+  x: number
+  y: number
+  width: number
+  height: number
 }
 
-export function PositionSizeFields({
-  elementId,
-  x,
-  y,
-  width,
-  height,
-}: PositionSizeFieldsProps) {
-  const updateElement = useEditorStore((state) => state.updateElement);
+export function PositionSizeFields({ elementId, x, y, width, height }: PositionSizeFieldsProps) {
+  const updateElement = useEditorStore((state) => state.updateElement)
 
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -67,5 +61,5 @@ export function PositionSizeFields({
         }
       />
     </div>
-  );
+  )
 }

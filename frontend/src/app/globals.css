@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme inline {
   --color-background: #f6f7f9;
@@ -44,8 +44,8 @@ button:disabled {
 }
 
 * {
-  scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
+  scrollbar-width: thin;
 }
 
 .canvas-text-input {

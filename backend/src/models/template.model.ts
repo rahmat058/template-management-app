@@ -1,6 +1,6 @@
-import type { Page } from "../types/document";
-import type { TemplateStatus } from "../types/template";
-import { model, Schema, type Document as MongoDocument } from "mongoose";
+import type { Page } from '../types/document'
+import type { TemplateStatus } from '../types/template'
+import { model, Schema, type Document as MongoDocument } from 'mongoose'
 
 const textConfigSchema = new Schema(
   {
@@ -11,20 +11,20 @@ const textConfigSchema = new Schema(
     color: { type: String, required: true },
     align: {
       type: String,
-      enum: ["left", "center", "right"],
+      enum: ['left', 'center', 'right'],
       required: true,
     },
   },
   { _id: false },
-);
+)
 
 const tableCellSchema = new Schema(
   {
     id: { type: String, required: true },
-    value: { type: String, default: "" },
+    value: { type: String, default: '' },
   },
   { _id: false },
-);
+)
 
 const tableRowSchema = new Schema(
   {
@@ -32,38 +32,38 @@ const tableRowSchema = new Schema(
     cells: { type: [tableCellSchema], default: [] },
   },
   { _id: false },
-);
+)
 
 const tableConfigSchema = new Schema(
   {
     columns: { type: Number, required: true },
     rows: { type: [tableRowSchema], default: [] },
     borderWidth: { type: Number, default: 1 },
-    borderColor: { type: String, default: "#D1D5DB" },
+    borderColor: { type: String, default: '#D1D5DB' },
     cellPadding: { type: Number, default: 8 },
     rowSpacing: { type: Number, default: 0 },
   },
   { _id: false },
-);
+)
 
 const imageConfigSchema = new Schema(
   {
-    src: { type: String, default: "" },
+    src: { type: String, default: '' },
     alt: { type: String, required: false },
     objectFit: {
       type: String,
-      enum: ["contain", "cover", "fill"],
-      default: "contain",
+      enum: ['contain', 'cover', 'fill'],
+      default: 'contain',
     },
   },
   { _id: false },
-);
+)
 
 const shapeConfigSchema = new Schema(
   {
     kind: {
       type: String,
-      enum: ["rectangle", "circle", "line"],
+      enum: ['rectangle', 'circle', 'line'],
       required: true,
     },
     fill: { type: String, required: true },
@@ -72,14 +72,14 @@ const shapeConfigSchema = new Schema(
     borderRadius: { type: Number, default: 0 },
   },
   { _id: false },
-);
+)
 
 const elementSchema = new Schema(
   {
     id: { type: String, required: true },
     type: {
       type: String,
-      enum: ["text", "table", "image", "shape"],
+      enum: ['text', 'table', 'image', 'shape'],
       required: true,
     },
     x: { type: Number, required: true },
@@ -95,7 +95,7 @@ const elementSchema = new Schema(
     shape: { type: shapeConfigSchema, required: false },
   },
   { _id: false },
-);
+)
 
 const pageSchema = new Schema(
   {
@@ -103,11 +103,11 @@ const pageSchema = new Schema(
     order: { type: Number, required: true },
     width: { type: Number, required: true },
     height: { type: Number, required: true },
-    background: { type: String, default: "#ffffff" },
+    background: { type: String, default: '#ffffff' },
     elements: { type: [elementSchema], default: [] },
   },
   { _id: false },
-);
+)
 
 const templateSchema = new Schema(
   {
@@ -127,28 +127,25 @@ const templateSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["draft", "active", "archived"],
-      default: "active",
+      enum: ['draft', 'active', 'archived'],
+      default: 'active',
     },
   },
   {
     timestamps: true,
   },
-);
+)
 
-templateSchema.index({ name: 1 });
-templateSchema.index({ updatedAt: -1 });
+templateSchema.index({ name: 1 })
+templateSchema.index({ updatedAt: -1 })
 
 export interface TemplateDocument extends MongoDocument {
-  name: string;
-  pages: Page[];
-  version: number;
-  status: TemplateStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  name: string
+  pages: Page[]
+  version: number
+  status: TemplateStatus
+  createdAt: Date
+  updatedAt: Date
 }
 
-export const TemplateModel = model<TemplateDocument>(
-  "Template",
-  templateSchema,
-);
+export const TemplateModel = model<TemplateDocument>('Template', templateSchema)

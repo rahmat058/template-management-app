@@ -1,14 +1,14 @@
-import { z } from "zod";
+import { z } from 'zod'
 
-export const TEXT_ALIGNS = ["left", "center", "right"] as const;
-export const IMAGE_OBJECT_FITS = ["contain", "cover", "fill"] as const;
-export const SHAPE_KINDS = ["rectangle", "circle", "line"] as const;
-export const TEMPLATE_STATUSES = ["draft", "active", "archived"] as const;
+export const TEXT_ALIGNS = ['left', 'center', 'right'] as const
+export const IMAGE_OBJECT_FITS = ['contain', 'cover', 'fill'] as const
+export const SHAPE_KINDS = ['rectangle', 'circle', 'line'] as const
+export const TEMPLATE_STATUSES = ['draft', 'active', 'archived'] as const
 
-const textAlignSchema = z.enum(TEXT_ALIGNS);
-const imageObjectFitSchema = z.enum(IMAGE_OBJECT_FITS);
-const shapeKindSchema = z.enum(SHAPE_KINDS);
-const templateStatusSchema = z.enum(TEMPLATE_STATUSES);
+const textAlignSchema = z.enum(TEXT_ALIGNS)
+const imageObjectFitSchema = z.enum(IMAGE_OBJECT_FITS)
+const shapeKindSchema = z.enum(SHAPE_KINDS)
+const templateStatusSchema = z.enum(TEMPLATE_STATUSES)
 
 const baseElementFields = {
   id: z.string().min(1).max(64),
@@ -19,11 +19,11 @@ const baseElementFields = {
   zIndex: z.number().int().min(0).max(10_000),
   locked: z.boolean(),
   visible: z.boolean(),
-};
+}
 
 const textElementSchema = z.object({
   ...baseElementFields,
-  type: z.literal("text"),
+  type: z.literal('text'),
   text: z.object({
     content: z.string().max(20_000),
     fontFamily: z.string().min(1).max(80),
@@ -32,21 +32,21 @@ const textElementSchema = z.object({
     color: z.string().min(1).max(32),
     align: textAlignSchema,
   }),
-});
+})
 
 const tableCellSchema = z.object({
   id: z.string().min(1).max(64),
   value: z.string().max(5_000),
-});
+})
 
 const tableRowSchema = z.object({
   id: z.string().min(1).max(64),
   cells: z.array(tableCellSchema).min(1).max(20),
-});
+})
 
 const tableElementSchema = z.object({
   ...baseElementFields,
-  type: z.literal("table"),
+  type: z.literal('table'),
   table: z
     .object({
       columns: z.number().int().min(1).max(20),
@@ -60,28 +60,28 @@ const tableElementSchema = z.object({
       table.rows.forEach((row, rowIndex) => {
         if (row.cells.length !== table.columns) {
           ctx.addIssue({
-            code: "custom",
+            code: 'custom',
             message: `Row ${rowIndex} must contain exactly ${table.columns} cells`,
-            path: ["rows", rowIndex, "cells"],
-          });
+            path: ['rows', rowIndex, 'cells'],
+          })
         }
-      });
+      })
     }),
-});
+})
 
 const imageElementSchema = z.object({
   ...baseElementFields,
-  type: z.literal("image"),
+  type: z.literal('image'),
   image: z.object({
     src: z.string().max(4_096),
     alt: z.string().max(200).optional(),
     objectFit: imageObjectFitSchema,
   }),
-});
+})
 
 const shapeElementSchema = z.object({
   ...baseElementFields,
-  type: z.literal("shape"),
+  type: z.literal('shape'),
   shape: z.object({
     kind: shapeKindSchema,
     fill: z.string().min(1).max(32),
@@ -89,14 +89,14 @@ const shapeElementSchema = z.object({
     borderWidth: z.number().finite().min(0).max(20),
     borderRadius: z.number().finite().min(0).max(999),
   }),
-});
+})
 
-const documentElementSchema = z.discriminatedUnion("type", [
+const documentElementSchema = z.discriminatedUnion('type', [
   textElementSchema,
   tableElementSchema,
   imageElementSchema,
   shapeElementSchema,
-]);
+])
 
 const pageSchema = z.object({
   id: z.string().min(1).max(64),
@@ -105,16 +105,16 @@ const pageSchema = z.object({
   height: z.number().finite().positive().max(10_000),
   background: z.string().min(1).max(32),
   elements: z.array(documentElementSchema).max(500),
-});
+})
 
-const templateNameSchema = z.string().trim().min(1).max(120);
+const templateNameSchema = z.string().trim().min(1).max(120)
 
 export const createTemplateSchema = z.object({
   name: templateNameSchema,
   pages: z.array(pageSchema).min(1).max(50),
   version: z.number().int().positive().optional().default(1),
-  status: templateStatusSchema.optional().default("active"),
-});
+  status: templateStatusSchema.optional().default('active'),
+})
 
 export const updateTemplateSchema = z
   .object({
@@ -124,9 +124,7 @@ export const updateTemplateSchema = z
     status: templateStatusSchema.optional(),
   })
   .refine((value) => Object.values(value).some((item) => item !== undefined), {
-    message: "At least one field is required",
-  });
+    message: 'At least one field is required',
+  })
 
-export const mongoObjectIdSchema = z
-  .string()
-  .regex(/^[a-fA-F0-9]{24}$/, "Invalid template id");
+export const mongoObjectIdSchema = z.string().regex(/^[a-fA-F0-9]{24}$/, 'Invalid template id')

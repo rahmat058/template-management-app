@@ -1,27 +1,22 @@
-"use client";
+'use client'
 
-import { Columns3, Plus, Rows3, Trash2 } from "lucide-react";
-import type { TableElement } from "@/types/element";
-import { Input } from "@/components/ui/Input";
-import { PanelAction } from "@/components/editor/properties/PanelAction";
-import { PositionSizeFields } from "@/components/editor/properties/PositionSizeFields";
-import { SectionTitle } from "@/components/editor/properties/SectionTitle";
-import { toColorInput } from "@/components/editor/properties/color";
-import { uniqueHistoryKey } from "@/lib/editor-history";
-import {
-  addTableColumn,
-  addTableRow,
-  deleteTableColumn,
-  deleteTableRow,
-} from "@/lib/document-utils";
-import { useEditorStore } from "@/store/editor.store";
+import { Columns3, Plus, Rows3, Trash2 } from 'lucide-react'
+import type { TableElement } from '@/types/element'
+import { Input } from '@/components/ui/Input'
+import { PanelAction } from '@/components/editor/properties/PanelAction'
+import { PositionSizeFields } from '@/components/editor/properties/PositionSizeFields'
+import { SectionTitle } from '@/components/editor/properties/SectionTitle'
+import { toColorInput } from '@/components/editor/properties/color'
+import { uniqueHistoryKey } from '@/lib/editor-history'
+import { addTableColumn, addTableRow, deleteTableColumn, deleteTableRow } from '@/lib/document-utils'
+import { useEditorStore } from '@/store/editor.store'
 
 export function TableSettings({ element }: { element: TableElement }) {
-  const updateElement = useEditorStore((state) => state.updateElement);
+  const updateElement = useEditorStore((state) => state.updateElement)
 
   return (
     <>
-      <section className="rounded-[12px] border border-border p-3">
+      <section className="border-border rounded-[12px] border p-3">
         <SectionTitle title="Table Settings" />
         <div className="mt-3 grid grid-cols-2 gap-3">
           <Input
@@ -30,9 +25,9 @@ export function TableSettings({ element }: { element: TableElement }) {
             min={0}
             value={element.table.borderWidth}
             onChange={(event) => {
-              const value = Number.parseInt(event.target.value, 10);
+              const value = Number.parseInt(event.target.value, 10)
               updateElement(element.id, (current) =>
-                current.type === "table"
+                current.type === 'table'
                   ? {
                       ...current,
                       table: {
@@ -41,7 +36,7 @@ export function TableSettings({ element }: { element: TableElement }) {
                       },
                     }
                   : current,
-              );
+              )
             }}
           />
           <Input
@@ -50,7 +45,7 @@ export function TableSettings({ element }: { element: TableElement }) {
             value={toColorInput(element.table.borderColor)}
             onChange={(event) =>
               updateElement(element.id, (current) =>
-                current.type === "table"
+                current.type === 'table'
                   ? {
                       ...current,
                       table: {
@@ -69,7 +64,7 @@ export function TableSettings({ element }: { element: TableElement }) {
             value={element.table.cellPadding}
             onChange={(event) =>
               updateElement(element.id, (current) =>
-                current.type === "table"
+                current.type === 'table'
                   ? {
                       ...current,
                       table: {
@@ -88,7 +83,7 @@ export function TableSettings({ element }: { element: TableElement }) {
             value={element.table.rowSpacing}
             onChange={(event) =>
               updateElement(element.id, (current) =>
-                current.type === "table"
+                current.type === 'table'
                   ? {
                       ...current,
                       table: {
@@ -103,7 +98,7 @@ export function TableSettings({ element }: { element: TableElement }) {
         </div>
       </section>
 
-      <section className="rounded-[12px] border border-border p-3">
+      <section className="border-border rounded-[12px] border p-3">
         <SectionTitle icon={<Columns3 className="h-3.5 w-3.5" />} title="Column Management" />
         <div className="mt-3 grid grid-cols-2 gap-2">
           <PanelAction
@@ -112,9 +107,8 @@ export function TableSettings({ element }: { element: TableElement }) {
             onClick={() =>
               updateElement(
                 element.id,
-                (current) =>
-                  current.type === "table" ? addTableColumn(current) : current,
-                uniqueHistoryKey("add-column", element.id),
+                (current) => (current.type === 'table' ? addTableColumn(current) : current),
+                uniqueHistoryKey('add-column', element.id),
               )
             }
           />
@@ -125,20 +119,17 @@ export function TableSettings({ element }: { element: TableElement }) {
             onClick={() =>
               updateElement(
                 element.id,
-                (current) =>
-                  current.type === "table" ? deleteTableColumn(current) : current,
-                uniqueHistoryKey("delete-column", element.id),
+                (current) => (current.type === 'table' ? deleteTableColumn(current) : current),
+                uniqueHistoryKey('delete-column', element.id),
               )
             }
           />
         </div>
       </section>
 
-      <section className="rounded-[12px] border border-border p-3">
+      <section className="border-border rounded-[12px] border p-3">
         <SectionTitle icon={<Rows3 className="h-3.5 w-3.5" />} title="Row Management" />
-        <p className="mt-1 text-[11px] text-muted">
-          Drag a row handle on the canvas to reorder rows.
-        </p>
+        <p className="text-muted mt-1 text-[11px]">Drag a row handle on the canvas to reorder rows.</p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <PanelAction
             icon={<Plus className="h-3.5 w-3.5" />}
@@ -146,9 +137,8 @@ export function TableSettings({ element }: { element: TableElement }) {
             onClick={() =>
               updateElement(
                 element.id,
-                (current) =>
-                  current.type === "table" ? addTableRow(current) : current,
-                uniqueHistoryKey("add-row", element.id),
+                (current) => (current.type === 'table' ? addTableRow(current) : current),
+                uniqueHistoryKey('add-row', element.id),
               )
             }
           />
@@ -159,16 +149,15 @@ export function TableSettings({ element }: { element: TableElement }) {
             onClick={() =>
               updateElement(
                 element.id,
-                (current) =>
-                  current.type === "table" ? deleteTableRow(current) : current,
-                uniqueHistoryKey("delete-row", element.id),
+                (current) => (current.type === 'table' ? deleteTableRow(current) : current),
+                uniqueHistoryKey('delete-row', element.id),
               )
             }
           />
         </div>
       </section>
 
-      <section className="rounded-[12px] border border-border p-3">
+      <section className="border-border rounded-[12px] border p-3">
         <SectionTitle title="Position & Size" />
         <div className="mt-3">
           <PositionSizeFields
@@ -181,5 +170,5 @@ export function TableSettings({ element }: { element: TableElement }) {
         </div>
       </section>
     </>
-  );
+  )
 }

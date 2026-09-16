@@ -1,6 +1,7 @@
 .next
 **/.next
 frontend
+.commandcode
 out
 build
 coverage

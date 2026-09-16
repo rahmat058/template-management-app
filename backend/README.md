@@ -51,23 +51,23 @@ Run the frontend in a **separate terminal** (`cd frontend` then `npm run dev`).
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the API with nodemon + tsx |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm run start` | Run the compiled server (`node dist/server.js`) |
-| `npm run typecheck` | Type-check without emitting files |
+| Command             | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| `npm run dev`       | Start the API with nodemon + tsx                |
+| `npm run build`     | Compile TypeScript to `dist/`                   |
+| `npm run start`     | Run the compiled server (`node dist/server.js`) |
+| `npm run typecheck` | Type-check without emitting files               |
 
 ## API endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/health` | Service and MongoDB status |
-| `GET` | `/api/templates` | List saved templates |
-| `POST` | `/api/templates` | Create a template |
-| `GET` | `/api/templates/:id` | Get one template |
-| `PATCH` | `/api/templates/:id` | Update a template |
-| `DELETE` | `/api/templates/:id` | Delete a template |
+| Method   | Path                 | Description                |
+| -------- | -------------------- | -------------------------- |
+| `GET`    | `/api/health`        | Service and MongoDB status |
+| `GET`    | `/api/templates`     | List saved templates       |
+| `POST`   | `/api/templates`     | Create a template          |
+| `GET`    | `/api/templates/:id` | Get one template           |
+| `PATCH`  | `/api/templates/:id` | Update a template          |
+| `DELETE` | `/api/templates/:id` | Delete a template          |
 
 Health check example:
 

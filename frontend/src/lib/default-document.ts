@@ -1,40 +1,40 @@
-import { A4_PORTRAIT, DOCUMENT_VERSION, type Page } from "@/types/document";
-import type { DocumentElement } from "@/types/element";
-import { COMPANY_LOGO_ID, COMPANY_LOGO_PATH } from "@/lib/company-logo";
+import { A4_PORTRAIT, DOCUMENT_VERSION, type Page } from '@/types/document'
+import type { DocumentElement } from '@/types/element'
+import { COMPANY_LOGO_ID, COMPANY_LOGO_PATH } from '@/lib/company-logo'
 
-export { DOCUMENT_VERSION };
+export { DOCUMENT_VERSION }
 
 export function createId(prefix: string): string {
-  return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${crypto.randomUUID()}`
 }
 
 export function createPage(overrides?: Partial<Page>): Page {
   return {
-    id: createId("page"),
+    id: createId('page'),
     order: 0,
     width: A4_PORTRAIT.width,
     height: A4_PORTRAIT.height,
-    background: "#ffffff",
+    background: '#ffffff',
     elements: [],
     ...overrides,
-  };
+  }
 }
 
 export function createDefaultPages(): Page[] {
   return [
     createPage({
-      id: "page-1",
+      id: 'page-1',
       order: 0,
       elements: createDefaultElements(),
     }),
-  ];
+  ]
 }
 
 function createDefaultElements(): DocumentElement[] {
   return [
     {
       id: COMPANY_LOGO_ID,
-      type: "image",
+      type: 'image',
       x: 56,
       y: 44,
       width: 40,
@@ -44,13 +44,13 @@ function createDefaultElements(): DocumentElement[] {
       visible: true,
       image: {
         src: COMPANY_LOGO_PATH,
-        alt: "Company logo",
-        objectFit: "cover",
+        alt: 'Company logo',
+        objectFit: 'cover',
       },
     },
     {
-      id: "text-company",
-      type: "text",
+      id: 'text-company',
+      type: 'text',
       x: 108,
       y: 42,
       width: 280,
@@ -59,17 +59,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "Your Company",
-        fontFamily: "Inter",
+        content: 'Your Company',
+        fontFamily: 'Inter',
         fontSize: 20,
         fontWeight: 700,
-        color: "#0F172A",
-        align: "left",
+        color: '#0F172A',
+        align: 'left',
       },
     },
     {
-      id: "text-tagline",
-      type: "text",
+      id: 'text-tagline',
+      type: 'text',
       x: 108,
       y: 66,
       width: 280,
@@ -78,17 +78,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "Better Documents, Better Business",
-        fontFamily: "Inter",
+        content: 'Better Documents, Better Business',
+        fontFamily: 'Inter',
         fontSize: 11,
         fontWeight: 400,
-        color: "#64748B",
-        align: "left",
+        color: '#64748B',
+        align: 'left',
       },
     },
     {
-      id: "text-document-title",
-      type: "text",
+      id: 'text-document-title',
+      type: 'text',
       x: 390,
       y: 46,
       width: 348,
@@ -97,17 +97,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "VISUAL DOCUMENT",
-        fontFamily: "Inter",
+        content: 'VISUAL DOCUMENT',
+        fontFamily: 'Inter',
         fontSize: 26,
         fontWeight: 800,
-        color: "#0F172A",
-        align: "right",
+        color: '#0F172A',
+        align: 'right',
       },
     },
     {
-      id: "text-issuer-label",
-      type: "text",
+      id: 'text-issuer-label',
+      type: 'text',
       x: 56,
       y: 118,
       width: 200,
@@ -116,17 +116,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "ISSUER/",
-        fontFamily: "Inter",
+        content: 'ISSUER/',
+        fontFamily: 'Inter',
         fontSize: 11,
         fontWeight: 700,
-        color: "#2563EB",
-        align: "left",
+        color: '#2563EB',
+        align: 'left',
       },
     },
     {
-      id: "text-issuer",
-      type: "text",
+      id: 'text-issuer',
+      type: 'text',
       x: 56,
       y: 136,
       width: 200,
@@ -135,17 +135,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "Issuer Details",
-        fontFamily: "Inter",
+        content: 'Issuer Details',
+        fontFamily: 'Inter',
         fontSize: 12,
         fontWeight: 400,
-        color: "#64748B",
-        align: "left",
+        color: '#64748B',
+        align: 'left',
       },
     },
     {
-      id: "text-client-label",
-      type: "text",
+      id: 'text-client-label',
+      type: 'text',
       x: 280,
       y: 118,
       width: 200,
@@ -154,17 +154,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "Client Details",
-        fontFamily: "Inter",
+        content: 'Client Details',
+        fontFamily: 'Inter',
         fontSize: 11,
         fontWeight: 700,
-        color: "#2563EB",
-        align: "left",
+        color: '#2563EB',
+        align: 'left',
       },
     },
     {
-      id: "text-date-label",
-      type: "text",
+      id: 'text-date-label',
+      type: 'text',
       x: 500,
       y: 118,
       width: 238,
@@ -173,17 +173,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "No/Date:  C-2026-061",
-        fontFamily: "Inter",
+        content: 'No/Date:  C-2026-061',
+        fontFamily: 'Inter',
         fontSize: 11,
         fontWeight: 700,
-        color: "#0F172A",
-        align: "right",
+        color: '#0F172A',
+        align: 'right',
       },
     },
     {
-      id: "text-date",
-      type: "text",
+      id: 'text-date',
+      type: 'text',
       x: 500,
       y: 136,
       width: 238,
@@ -192,17 +192,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "2026-09-14",
-        fontFamily: "Inter",
+        content: '2026-09-14',
+        fontFamily: 'Inter',
         fontSize: 12,
         fontWeight: 400,
-        color: "#64748B",
-        align: "right",
+        color: '#64748B',
+        align: 'right',
       },
     },
     {
-      id: "table-quotation",
-      type: "table",
+      id: 'table-quotation',
+      type: 'table',
       x: 56,
       y: 188,
       width: 682,
@@ -213,76 +213,76 @@ function createDefaultElements(): DocumentElement[] {
       table: {
         columns: 5,
         borderWidth: 0,
-        borderColor: "#DBEAFE",
+        borderColor: '#DBEAFE',
         cellPadding: 10,
         rowSpacing: 6,
         rows: [
           {
-            id: "row-header",
+            id: 'row-header',
             cells: [
-              { id: "c-h-1", value: "#" },
-              { id: "c-h-2", value: "Item Detail" },
-              { id: "c-h-3", value: "Qty" },
-              { id: "c-h-4", value: "Unit Price" },
-              { id: "c-h-5", value: "Amount" },
+              { id: 'c-h-1', value: '#' },
+              { id: 'c-h-2', value: 'Item Detail' },
+              { id: 'c-h-3', value: 'Qty' },
+              { id: 'c-h-4', value: 'Unit Price' },
+              { id: 'c-h-5', value: 'Amount' },
             ],
           },
           {
-            id: "row-1",
+            id: 'row-1',
             cells: [
-              { id: "c-1-1", value: "1" },
-              { id: "c-1-2", value: "Product A" },
-              { id: "c-1-3", value: "2" },
-              { id: "c-1-4", value: "$10.00" },
-              { id: "c-1-5", value: "$20.00" },
+              { id: 'c-1-1', value: '1' },
+              { id: 'c-1-2', value: 'Product A' },
+              { id: 'c-1-3', value: '2' },
+              { id: 'c-1-4', value: '$10.00' },
+              { id: 'c-1-5', value: '$20.00' },
             ],
           },
           {
-            id: "row-2",
+            id: 'row-2',
             cells: [
-              { id: "c-2-1", value: "2" },
-              { id: "c-2-2", value: "Product B" },
-              { id: "c-2-3", value: "3" },
-              { id: "c-2-4", value: "$10.00" },
-              { id: "c-2-5", value: "$45.00" },
+              { id: 'c-2-1', value: '2' },
+              { id: 'c-2-2', value: 'Product B' },
+              { id: 'c-2-3', value: '3' },
+              { id: 'c-2-4', value: '$10.00' },
+              { id: 'c-2-5', value: '$45.00' },
             ],
           },
           {
-            id: "row-3",
+            id: 'row-3',
             cells: [
-              { id: "c-3-1", value: "3" },
-              { id: "c-3-2", value: "Product B" },
-              { id: "c-3-3", value: "1" },
-              { id: "c-3-4", value: "$15.00" },
-              { id: "c-3-5", value: "$45.00" },
+              { id: 'c-3-1', value: '3' },
+              { id: 'c-3-2', value: 'Product B' },
+              { id: 'c-3-3', value: '1' },
+              { id: 'c-3-4', value: '$15.00' },
+              { id: 'c-3-5', value: '$45.00' },
             ],
           },
           {
-            id: "row-4",
+            id: 'row-4',
             cells: [
-              { id: "c-4-1", value: "4" },
-              { id: "c-4-2", value: "Product C" },
-              { id: "c-4-3", value: "1" },
-              { id: "c-4-4", value: "$50.00" },
-              { id: "c-4-5", value: "$50.00" },
+              { id: 'c-4-1', value: '4' },
+              { id: 'c-4-2', value: 'Product C' },
+              { id: 'c-4-3', value: '1' },
+              { id: 'c-4-4', value: '$50.00' },
+              { id: 'c-4-5', value: '$50.00' },
             ],
           },
           {
-            id: "row-5",
+            id: 'row-5',
             cells: [
-              { id: "c-5-1", value: "5" },
-              { id: "c-5-2", value: "Product D" },
-              { id: "c-5-3", value: "5" },
-              { id: "c-5-4", value: "$8.00" },
-              { id: "c-5-5", value: "$40.00" },
+              { id: 'c-5-1', value: '5' },
+              { id: 'c-5-2', value: 'Product D' },
+              { id: 'c-5-3', value: '5' },
+              { id: 'c-5-4', value: '$8.00' },
+              { id: 'c-5-5', value: '$40.00' },
             ],
           },
         ],
       },
     },
     {
-      id: "text-notes",
-      type: "text",
+      id: 'text-notes',
+      type: 'text',
       x: 56,
       y: 608,
       width: 500,
@@ -291,17 +291,17 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       text: {
-        content: "Note: Full PDF layout rendered only upon export.",
-        fontFamily: "Inter",
+        content: 'Note: Full PDF layout rendered only upon export.',
+        fontFamily: 'Inter',
         fontSize: 11,
         fontWeight: 400,
-        color: "#94A3B8",
-        align: "left",
+        color: '#94A3B8',
+        align: 'left',
       },
     },
     {
-      id: "shape-footer",
-      type: "shape",
+      id: 'shape-footer',
+      type: 'shape',
       x: 620,
       y: 1048,
       width: 118,
@@ -310,12 +310,12 @@ function createDefaultElements(): DocumentElement[] {
       locked: false,
       visible: true,
       shape: {
-        kind: "rectangle",
-        fill: "#2563EB",
-        borderColor: "#2563EB",
+        kind: 'rectangle',
+        fill: '#2563EB',
+        borderColor: '#2563EB',
         borderWidth: 0,
         borderRadius: 999,
       },
     },
-  ];
+  ]
 }

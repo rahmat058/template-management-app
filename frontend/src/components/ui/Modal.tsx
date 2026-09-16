@@ -1,46 +1,46 @@
-"use client";
+'use client'
 
-import { useEffect, type ReactNode } from "react";
-import { Button } from "@/components/ui/Button";
+import { useEffect, type ReactNode } from 'react'
+import { Button } from '@/components/ui/Button'
 
 interface ModalProps {
-  open: boolean;
-  title: string;
-  children: ReactNode;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  danger?: boolean;
-  onConfirm?: () => void;
-  onClose: () => void;
+  open: boolean
+  title: string
+  children: ReactNode
+  confirmLabel?: string
+  cancelLabel?: string
+  danger?: boolean
+  onConfirm?: () => void
+  onClose: () => void
 }
 
 export function Modal({
   open,
   title,
   children,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
   danger = false,
   onConfirm,
   onClose,
 }: ModalProps) {
   useEffect(() => {
     if (!open) {
-      return;
+      return
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
+      if (event.key === 'Escape') {
+        onClose()
       }
-    };
+    }
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open, onClose])
 
   if (!open) {
-    return null;
+    return null
   }
 
   return (
@@ -49,21 +49,20 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="w-full max-w-md rounded-[12px] border border-border bg-surface p-5 shadow-xl"
-      >
-        <h2 id="modal-title" className="text-[16px] font-semibold text-foreground">
+        className="border-border bg-surface w-full max-w-md rounded-[12px] border p-5 shadow-xl">
+        <h2 id="modal-title" className="text-foreground text-[16px] font-semibold">
           {title}
         </h2>
-        <div className="mt-3 text-[13px] text-muted">{children}</div>
+        <div className="text-muted mt-3 text-[13px]">{children}</div>
         <div className="mt-5 flex justify-end gap-2">
           <Button onClick={onClose}>{cancelLabel}</Button>
           {onConfirm ? (
-            <Button variant={danger ? "danger" : "primary"} onClick={onConfirm}>
+            <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>
               {confirmLabel}
             </Button>
           ) : null}
         </div>
       </div>
     </div>
-  );
+  )
 }
