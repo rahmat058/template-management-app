@@ -302,7 +302,7 @@ is called by undo/redo.
 
 ```text
 EditorShell (h-screen flex column)
-├── EditorHeader      60px  Project Name · status · Undo/Redo · Preview · Save · Download PDF
+├── EditorHeader      60px  Template name + Undo/Redo · status · Preview · Save · Download PDF
 ├── TemplateTabs      44px  tab strip with dirty "•" markers and "+" to add a tab
 └── flex-1 row
     ├── Toolbox            240px dark rail: components + PageThumbnails

@@ -50,7 +50,7 @@ No `any` types.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Header: Project Name | Undo | Redo | Preview | Save | Download PDF  │
+│ Header: Template name | Undo | Redo | Preview | Save | Download PDF │
 ├──────────────────────────────────────────────────────────────────────┤
 │ Template Tabs: [New-Template] [Template-1] [+]                       │
 ├───────────────┬─────────────────────────────────┬────────────────────┤
@@ -171,7 +171,9 @@ Header should be compact and persistent.
 ### Left
 
 - App/product mark.
-- Project name input.
+- Template name input.
+- Undo.
+- Redo.
 - Unsaved indicator.
 
 ### Center
@@ -180,8 +182,6 @@ Header should be compact and persistent.
 
 ### Right
 
-- Undo.
-- Redo.
 - Preview.
 - Save.
 - Download PDF.
@@ -196,7 +196,7 @@ Buttons should have:
 Example:
 
 ```text
-[Logo] [Project Name________]     [↶] [↷] [Preview] [Save] [Download PDF]
+[Logo] [Template name________] [↶] [↷]     [Preview] [Save] [Download PDF]
 ```
 
 ## 8. Tab Bar
@@ -518,21 +518,18 @@ Suggested editor state:
 
 ```ts
 interface EditorState {
-  activeTabId: string | null;
-  activePageId: string | null;
-  selectedElementId: string | null;
-  mode: "edit" | "preview";
-  isDirty: boolean;
+  activeTabId: string | null
+  activePageId: string | null
+  selectedElementId: string | null
+  mode: 'edit' | 'preview'
+  isDirty: boolean
 
-  tabs: EditorTab[];
+  tabs: EditorTab[]
 
-  selectElement: (id: string | null) => void;
-  setActivePage: (id: string) => void;
-  addElement: (element: DocumentElement) => void;
-  updateElement: (
-    id: string,
-    update: Partial<DocumentElement>
-  ) => void;
+  selectElement: (id: string | null) => void
+  setActivePage: (id: string) => void
+  addElement: (element: DocumentElement) => void
+  updateElement: (id: string, update: Partial<DocumentElement>) => void
 }
 ```
 
@@ -541,9 +538,7 @@ Avoid broad subscriptions such as subscribing every component to the entire stor
 Prefer selectors:
 
 ```ts
-const selectedElement = useEditorStore(
-  (state) => state.getSelectedElement()
-);
+const selectedElement = useEditorStore((state) => state.getSelectedElement())
 ```
 
 ## 18. TanStack Query
@@ -551,8 +546,7 @@ const selectedElement = useEditorStore(
 Recommended query keys:
 
 ```ts
-["templates"]
-["templates", templateId]
+;['templates'][('templates', templateId)]
 ```
 
 Mutations:
@@ -721,30 +715,30 @@ Panels should support the editing task rather than compete with the document.
 ```ts
 export const tokens = {
   radius: {
-    sm: "6px",
-    md: "8px",
-    lg: "12px",
+    sm: '6px',
+    md: '8px',
+    lg: '12px',
   },
 
   sidebar: {
-    toolbox: "240px",
-    properties: "300px",
+    toolbox: '240px',
+    properties: '300px',
   },
 
   header: {
-    height: "60px",
+    height: '60px',
   },
 
   colors: {
-    workspace: "#F3F4F6",
-    surface: "#FFFFFF",
-    border: "#E5E7EB",
-    text: "#111827",
-    muted: "#6B7280",
-    primary: "#2563EB",
-    danger: "#DC2626",
+    workspace: '#F3F4F6',
+    surface: '#FFFFFF',
+    border: '#E5E7EB',
+    text: '#111827',
+    muted: '#6B7280',
+    primary: '#2563EB',
+    danger: '#DC2626',
   },
-};
+}
 ```
 
 ## 27. Final Frontend Goal

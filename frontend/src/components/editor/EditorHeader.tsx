@@ -41,27 +41,29 @@ export function EditorHeader() {
           </p>
         </div>
         <label className="ml-4 flex max-w-sm min-w-[240px] items-center gap-2">
-          <span className="text-muted text-[12px] font-medium whitespace-nowrap">Project Name</span>
+          <span className="text-muted text-[12px] font-medium whitespace-nowrap">Template name</span>
           <input
-            aria-label="Project name"
+            aria-label="Template name"
             value={name}
             onChange={(event) => setTabName(event.target.value)}
             className="border-border bg-surface-muted text-foreground focus:border-primary focus:bg-surface focus:ring-primary/20 h-9 w-full rounded-[8px] border px-3 text-[13px] font-medium transition-colors outline-none focus:ring-2"
           />
         </label>
+        <div className="flex items-center gap-1">
+          <Tooltip label="Undo" shortcut="Ctrl+Z">
+            <Button size="icon" variant="ghost" aria-label="Undo" disabled={!canUndo} onClick={undo}>
+              <Undo2 className="h-4 w-4" />
+            </Button>
+          </Tooltip>
+          <Tooltip label="Redo" shortcut="Ctrl+Shift+Z">
+            <Button size="icon" variant="ghost" aria-label="Redo" disabled={!canRedo} onClick={redo}>
+              <Redo2 className="h-4 w-4" />
+            </Button>
+          </Tooltip>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <Tooltip label="Undo" shortcut="Ctrl+Z">
-          <Button size="icon" variant="ghost" aria-label="Undo" disabled={!canUndo} onClick={undo}>
-            <Undo2 className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-        <Tooltip label="Redo" shortcut="Ctrl+Shift+Z">
-          <Button size="icon" variant="ghost" aria-label="Redo" disabled={!canRedo} onClick={redo}>
-            <Redo2 className="h-4 w-4" />
-          </Button>
-        </Tooltip>
         <Tooltip label="Preview">
           <Button
             aria-label="Preview"
