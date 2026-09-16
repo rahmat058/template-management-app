@@ -1,7 +1,7 @@
 'use client'
 
-import { FileText, Plus, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { FileText, Plus, X } from 'lucide-react'
 import { DEFAULT_TAB_NAME } from '@/lib/templates'
 import { useEditorStore } from '@/store/editor.store'
 
@@ -13,8 +13,8 @@ export function TemplateTabs() {
   const closeTab = useEditorStore((state) => state.closeTab)
 
   return (
-    <div className="border-border bg-surface flex h-[44px] shrink-0 items-center gap-1 border-b px-3">
-      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+    <div className="border-border bg-background flex h-11 shrink-0 items-stretch border-b px-2">
+      <div className="flex min-w-0 flex-1 items-stretch gap-0.5 overflow-x-auto">
         {tabs.map((tab) => {
           const active = tab.id === activeTabId
 
@@ -22,35 +22,37 @@ export function TemplateTabs() {
             <div
               key={tab.id}
               className={cn(
-                'flex h-8 shrink-0 items-center rounded-[8px] px-1.5',
-                active ? 'bg-primary/10 text-primary' : 'text-muted hover:bg-surface-muted hover:text-foreground',
+                'flex max-w-56 shrink-0 items-center border-b-2 px-1 transition-colors',
+                active
+                  ? 'border-primary bg-surface text-foreground'
+                  : 'text-muted hover:bg-surface/70 hover:text-foreground border-transparent',
               )}>
               <button
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className="flex max-w-[180px] items-center gap-1.5 truncate px-2 text-[13px] font-medium">
-                <FileText className="h-3.5 w-3.5 shrink-0" />
-                {tab.name}
-                {tab.isDirty ? ' •' : ''}
+                className="flex min-w-0 items-center gap-2 px-1.5 py-2 text-[13px]">
+                <FileText className={cn('h-3.5 w-3.5 shrink-0', active ? 'text-primary' : 'text-muted-foreground')} />
+                <span className={cn('truncate', active && 'font-semibold')}>{tab.name}</span>
+                {tab.isDirty ? <span className="shrink-0 text-[13px] leading-none">•</span> : null}
               </button>
               <button
                 type="button"
                 aria-label={`Close ${tab.name}`}
                 onClick={() => closeTab(tab.id)}
-                className="text-muted hover:text-foreground rounded-[6px] p-1 hover:bg-white/70">
+                className="text-muted hover:bg-surface-muted hover:text-foreground mr-1 rounded-md p-1">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
           )
         })}
+        <button
+          type="button"
+          aria-label="Create new template tab"
+          onClick={() => createTab(DEFAULT_TAB_NAME)}
+          className="text-muted hover:bg-surface hover:text-foreground flex h-8 w-8 shrink-0 items-center justify-center self-center rounded-lg">
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
-      <button
-        type="button"
-        aria-label="Create new template tab"
-        onClick={() => createTab(DEFAULT_TAB_NAME)}
-        className="text-muted hover:bg-surface-muted hover:text-foreground flex h-8 w-8 items-center justify-center rounded-[8px]">
-        <Plus className="h-4 w-4" />
-      </button>
     </div>
   )
 }
