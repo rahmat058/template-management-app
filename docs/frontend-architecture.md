@@ -462,12 +462,20 @@ time — which is exactly what makes the autoload story work on the next visit.
 
 A Next.js route handler exposing **`POST`** only. It reads the `file` field from `formData` and
 rejects a malformed/non-multipart body and missing/empty input with `400`, payloads over **2 MB**
-(`400`), and anything that is not a PNG — checked against the full **8-byte** signature
-(`89 50 4E 47 0D 0A 1A 0A`, not just the first four bytes). The size guard runs against the declared
-`Content-Length` _before_ the body is buffered, then again against the exact `upload.size`. Valid
-uploads are written to `public/images/company-logo.png` and the route returns
-`{ ok: true, src: "/images/company-logo.png" }`; a filesystem failure returns `503` rather than an
-unhandled `500`. The client side lives in
+(`400`), and any format outside **PNG / JPEG / WebP**. The format is identified from magic bytes —
+PNG's full 8-byte signature, JPEG's `FF D8 FF`, and WebP's `RIFF` + `WEBP` pair — so the stored
+extension always matches the real content and the file is served with a correct `Content-Type`.
+**SVG is deliberately rejected:** it is script-capable and the upload is served back from the app's
+own origin, so accepting it would open a stored-XSS path. The size guard runs against the declared
+`Content-Length` _before_ the body is buffered, then again against the exact `upload.size`. A valid
+upload is written to `public/images/company-logo.<ext>` and the route returns
+`{ ok: true, src: "/images/company-logo.<ext>" }`; a filesystem failure returns `503` rather than an
+unhandled `500`.
+
+The seeded default document (`lib/default-document.ts`) and the backend seed both still reference
+`/images/company-logo.png`, which keeps resolving from the tracked asset — so uploading a JPEG or
+WebP does not disturb them, and a stale `company-logo.png` can legitimately sit alongside a newer
+`company-logo.jpg`. The client side lives in
 `lib/company-logo.ts`, which converts arbitrary images to PNG (`createImageBitmap` + canvas) before
 posting.
 
@@ -568,10 +576,11 @@ Things to know that the spec documents do not reflect:
    silently to blank space.
 9. **No authentication, routing, or persistence beyond templates.** `src/app/page.tsx` renders the
    editor directly; there are no other pages or layouts.
-10. **Single-user assumptions** — the logo route writes to a shared `public/images/company-logo.png`,
-    so concurrent uploads overwrite each other. The write also assumes a writable filesystem, which
-    does not hold on read-only or serverless deployments (it now fails with a `503` rather than an
-    unhandled `500`, but it still cannot persist there).
+10. **Single-user assumptions** — the logo route writes into a shared `public/images/`, so two users
+    uploading the same format overwrite each other (different formats coexist at different
+    extensions). The write also assumes a writable filesystem, which does not hold on read-only or
+    serverless deployments (it now fails with a `503` rather than an unhandled `500`, but it still
+    cannot persist there).
 11. **The dirty flag does not track the save point across undo/redo.** `markSaved` only flips the
     live tab's flag, while `applySnapshot` restores the `isDirty` recorded in whichever snapshot is
     applied. Undoing back past the last save can therefore leave a changed document marked clean.

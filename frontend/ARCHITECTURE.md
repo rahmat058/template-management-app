@@ -54,7 +54,7 @@ frontend/
 │   │   ├── page.tsx         # renders <EditorShell />
 │   │   ├── providers.tsx    # QueryClientProvider
 │   │   ├── globals.css      # Tailwind v4 @theme tokens
-│   │   └── api/company-logo/route.ts   # POST, writes public/images/company-logo.png
+│   │   └── api/company-logo/route.ts   # POST, writes public/images/company-logo.<ext>
 │   ├── components/
 │   │   ├── editor/          # shell, header, tabs, toolbox, canvas, panels
 │   │   │   └── properties/  # per-element settings panels
@@ -66,7 +66,7 @@ frontend/
 │   ├── lib/                 # api, history, dnd, resize, tokens, pdf
 │   ├── store/               # editor.store, ui.store, history.store
 │   └── types/               # document, element, template, api
-└── public/images/           # company-logo.png (written by the API route), footer-logo.png
+└── public/images/           # company-logo.<ext> (written by the API route), footer-logo.png
 ```
 
 `npm run build` runs `next build` (Turbopack). `npm run typecheck` is `tsc --noEmit`.
@@ -183,15 +183,15 @@ Fonts are the built-in PDF standard faces only — `Georgia`/`Times New Roman` �
 
 ## Cross-cutting concerns
 
-| Topic            | Implementation                                                                                                                                                    |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Styling**      | Tailwind CSS 4; semantic tokens in the `@theme` block of `globals.css`, mirrored in `lib/tokens.ts`                                                               |
-| **Hydration**    | `useHasMounted` (server snapshot `false`) gates DnD so SSR never attaches drag handlers                                                                           |
-| **Keyboard**     | `Cmd/Ctrl+S` save · `Z` undo · `Shift+Z` / `Y` redo · `Esc` exit preview or clear selection · `Delete`/`Backspace` remove element (skipped while editing a field) |
-| **Company logo** | `image-logo` element id, `/images/company-logo.png`; non-PNG uploads are converted via canvas before posting                                                      |
-| **Icons**        | `lucide-react`                                                                                                                                                    |
-| **Dates**        | `date-fns` formatting in the saved-templates panel                                                                                                                |
-| **Class names**  | `cn()` = `clsx` + `tailwind-merge`                                                                                                                                |
+| Topic            | Implementation                                                                                                                                                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Styling**      | Tailwind CSS 4; semantic tokens in the `@theme` block of `globals.css`, mirrored in `lib/tokens.ts`                                                                                                                                            |
+| **Hydration**    | `useHasMounted` (server snapshot `false`) gates DnD so SSR never attaches drag handlers                                                                                                                                                        |
+| **Keyboard**     | `Cmd/Ctrl+S` save · `Z` undo · `Shift+Z` / `Y` redo · `Esc` exit preview or clear selection · `Delete`/`Backspace` remove element (skipped while editing a field)                                                                              |
+| **Company logo** | `image-logo` element id, `/images/company-logo.png` default; the route accepts PNG/JPEG/WebP and stores under the matching extension; the client converts non-PNG uploads via canvas first (SVG is rasterised, so SVG never reaches the route) |
+| **Icons**        | `lucide-react`                                                                                                                                                                                                                                 |
+| **Dates**        | `date-fns` formatting in the saved-templates panel                                                                                                                                                                                             |
+| **Class names**  | `cn()` = `clsx` + `tailwind-merge`                                                                                                                                                                                                             |
 
 ---
 
