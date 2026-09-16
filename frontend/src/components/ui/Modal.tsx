@@ -10,6 +10,7 @@ interface ModalProps {
   confirmLabel?: string
   cancelLabel?: string
   danger?: boolean
+  confirmLoading?: boolean
   onConfirm?: () => void
   onClose: () => void
 }
@@ -21,6 +22,7 @@ export function Modal({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   danger = false,
+  confirmLoading = false,
   onConfirm,
   onClose,
 }: ModalProps) {
@@ -49,7 +51,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="border-border bg-surface w-full max-w-md rounded-[12px] border p-5 shadow-xl">
+        className="border-border bg-surface w-full max-w-md rounded-xl border p-5 shadow-xl">
         <h2 id="modal-title" className="text-foreground text-[16px] font-semibold">
           {title}
         </h2>
@@ -57,7 +59,7 @@ export function Modal({
         <div className="mt-5 flex justify-end gap-2">
           <Button onClick={onClose}>{cancelLabel}</Button>
           {onConfirm ? (
-            <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>
+            <Button variant={danger ? 'danger' : 'primary'} isLoading={confirmLoading} onClick={onConfirm}>
               {confirmLabel}
             </Button>
           ) : null}

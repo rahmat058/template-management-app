@@ -1,9 +1,10 @@
 'use client'
 
 import { cn } from '@/lib/cn'
-import type { Page } from '@/types/document'
-import { useEffect, useRef, useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
+
 import { ImageElement } from '@/components/elements/ImageElement'
 import { ShapeElement } from '@/components/elements/ShapeElement'
 import { TableElement } from '@/components/elements/TableElement'
@@ -12,25 +13,35 @@ import { useEditorStore } from '@/store/editor.store'
 import type { DocumentElement } from '@/types/element'
 
 export function PageThumbnails() {
-  const pages = useEditorStore((state) => state.getActiveTab()?.document.pages ?? [])
+  // Subscribe to the ids rather than the pages array: the array gets a new identity on every
+  // document edit, which would re-render every thumbnail. The ids only change structurally.
+  const pageIds = useEditorStore(
+    useShallow((state) => state.getActiveTab()?.document.pages.map((page) => page.id) ?? []),
+  )
   const activePageId = useEditorStore((state) => state.getActiveTab()?.activePageId)
   const addPage = useEditorStore((state) => state.addPage)
-  const setActivePage = useEditorStore((state) => state.setActivePage)
-  const removePage = useEditorStore((state) => state.removePage)
+
+  const selectPage = useCallback((pageId: string) => {
+    useEditorStore.getState().setActivePage(pageId)
+  }, [])
+
+  const deletePage = useCallback((pageId: string) => {
+    useEditorStore.getState().removePage(pageId)
+  }, [])
 
   return (
     <section className="border-toolbox-border mt-auto flex min-h-0 flex-1 flex-col border-t p-3">
       <h2 className="text-toolbox-subtle mb-2 px-2 text-[11px] font-semibold tracking-wide uppercase">Pages</h2>
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
-        {pages.map((page, index) => (
+        {pageIds.map((pageId, index) => (
           <PageThumbnail
-            key={page.id}
-            page={page}
+            key={pageId}
+            pageId={pageId}
             index={index}
-            active={page.id === activePageId}
-            canDelete={pages.length > 1}
-            onSelect={() => setActivePage(page.id)}
-            onDelete={() => removePage(page.id)}
+            active={pageId === activePageId}
+            canDelete={pageIds.length > 1}
+            onSelect={selectPage}
+            onDelete={deletePage}
           />
         ))}
       </div>
@@ -45,24 +56,26 @@ export function PageThumbnails() {
   )
 }
 
-function PageThumbnail({
-  page,
+interface PageThumbnailProps {
+  pageId: string
+  index: number
+  active: boolean
+  canDelete: boolean
+  onSelect: (pageId: string) => void
+  onDelete: (pageId: string) => void
+}
+
+const PageThumbnail = memo(function PageThumbnail({
+  pageId,
   index,
   active,
   canDelete,
   onSelect,
   onDelete,
-}: {
-  page: Page
-  index: number
-  active: boolean
-  canDelete: boolean
-  onSelect: () => void
-  onDelete: () => void
-}) {
+}: PageThumbnailProps) {
+  const page = useEditorStore((state) => state.getActiveTab()?.document.pages.find((item) => item.id === pageId))
   const previewRef = useRef<HTMLDivElement>(null)
   const [previewWidth, setPreviewWidth] = useState(0)
-  const scale = previewWidth > 0 ? previewWidth / page.width : 0
 
   useEffect(() => {
     const node = previewRef.current
@@ -81,6 +94,12 @@ function PageThumbnail({
     return () => observer.disconnect()
   }, [])
 
+  if (!page) {
+    return null
+  }
+
+  const scale = previewWidth > 0 ? previewWidth / page.width : 0
+
   return (
     <div
       className={cn(
@@ -93,13 +112,13 @@ function PageThumbnail({
           <button
             type="button"
             aria-label={`Delete page ${index + 1}`}
-            onClick={onDelete}
+            onClick={() => onDelete(pageId)}
             className="text-toolbox-subtle hover:bg-danger/20 hover:text-danger flex h-5 w-5 items-center justify-center rounded-full">
             <Trash2 className="h-3 w-3" />
           </button>
         ) : null}
       </div>
-      <button type="button" onClick={onSelect} className="block w-full text-left">
+      <button type="button" onClick={() => onSelect(pageId)} className="block w-full text-left">
         <div
           ref={previewRef}
           className="relative w-full overflow-hidden rounded-sm"
@@ -123,9 +142,9 @@ function PageThumbnail({
       </button>
     </div>
   )
-}
+})
 
-function ThumbnailElement({ element }: { element: DocumentElement }) {
+const ThumbnailElement = memo(function ThumbnailElement({ element }: { element: DocumentElement }) {
   return (
     <div
       className="absolute"
@@ -142,4 +161,4 @@ function ThumbnailElement({ element }: { element: DocumentElement }) {
       {element.type === 'shape' ? <ShapeElement element={element} /> : null}
     </div>
   )
-}
+})

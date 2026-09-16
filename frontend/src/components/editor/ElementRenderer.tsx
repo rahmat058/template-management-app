@@ -1,16 +1,17 @@
 'use client'
 
-import { memo } from 'react'
+import { cn } from '@/lib/cn'
+import { memo, useMemo } from 'react'
 import { CSS } from '@dnd-kit/utilities'
 import { useDraggable } from '@dnd-kit/core'
 import { useShallow } from 'zustand/react/shallow'
+
 import { MoveHandle } from '@/components/editor/MoveHandle'
 import { ResizeHandles } from '@/components/editor/ResizeHandles'
 import { ImageElement } from '@/components/elements/ImageElement'
 import { ShapeElement } from '@/components/elements/ShapeElement'
 import { TableElement } from '@/components/elements/TableElement'
 import { TextElement } from '@/components/elements/TextElement'
-import { cn } from '@/lib/cn'
 import type { DragHandleProps } from '@/lib/drag-handle'
 import { scaleDragTransform } from '@/lib/dnd-transform'
 import { useHasMounted } from '@/hooks/useHasMounted'
@@ -24,30 +25,19 @@ interface ElementRendererProps {
 }
 
 export const ElementRenderer = memo(function ElementRenderer({ pageId, elementId, interactive }: ElementRendererProps) {
-  const element = useEditorStore((state) => {
-    const tab = state.tabs.find((item) => item.id === state.activeTabId)
-    if (!tab) {
-      return null
-    }
-
-    const page = tab.document.pages.find((item) => item.id === pageId)
-    return page?.elements.find((item) => item.id === elementId) ?? null
-  })
-  const pageSize = useEditorStore(
+  const { element, selected, pageWidth, pageHeight } = useEditorStore(
     useShallow((state) => {
       const tab = state.tabs.find((item) => item.id === state.activeTabId)
       const page = tab?.document.pages.find((item) => item.id === pageId)
-      if (!page) {
-        return null
-      }
 
-      return { width: page.width, height: page.height }
+      return {
+        element: page?.elements.find((item) => item.id === elementId) ?? null,
+        selected: tab?.selectedElementId === elementId,
+        pageWidth: page?.width ?? 0,
+        pageHeight: page?.height ?? 0,
+      }
     }),
   )
-  const selected = useEditorStore((state) => {
-    const tab = state.tabs.find((item) => item.id === state.activeTabId)
-    return tab?.selectedElementId === elementId
-  })
   const selectElement = useEditorStore((state) => state.selectElement)
   const zoom = useUiStore((state) => state.zoom)
   const mounted = useHasMounted()
@@ -55,12 +45,15 @@ export const ElementRenderer = memo(function ElementRenderer({ pageId, elementId
     id: `element:${elementId}`,
     disabled: !interactive || Boolean(element?.locked),
   })
+  const dragHandleProps = useMemo(
+    () => (listeners != null ? ({ ...attributes, ...listeners } as DragHandleProps) : undefined),
+    [attributes, listeners],
+  )
 
   if (!element || !element.visible) {
     return null
   }
 
-  const dragHandleProps = listeners != null ? ({ ...attributes, ...listeners } as DragHandleProps) : undefined
   const usesDedicatedHandle = element.type === 'text' || element.type === 'table'
 
   return (
@@ -120,7 +113,7 @@ export const ElementRenderer = memo(function ElementRenderer({ pageId, elementId
       ) : null}
       {element.type === 'image' ? <ImageElement element={element} /> : null}
       {element.type === 'shape' ? <ShapeElement element={element} /> : null}
-      {interactive && selected && !element.locked && pageSize ? (
+      {interactive && selected && !element.locked && pageWidth > 0 ? (
         <ResizeHandles
           elementId={element.id}
           box={{
@@ -129,8 +122,8 @@ export const ElementRenderer = memo(function ElementRenderer({ pageId, elementId
             width: element.width,
             height: element.height,
           }}
-          pageWidth={pageSize.width}
-          pageHeight={pageSize.height}
+          pageWidth={pageWidth}
+          pageHeight={pageHeight}
         />
       ) : null}
     </div>

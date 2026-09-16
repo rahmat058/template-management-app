@@ -4,7 +4,7 @@ import { useSaveTemplate } from '@/hooks/useSaveTemplate'
 import { useEditorStore } from '@/store/editor.store'
 
 export function useKeyboardShortcuts(): void {
-  const saveTemplate = useSaveTemplate()
+  const { mutate: saveTemplate } = useSaveTemplate()
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -13,11 +13,15 @@ export function useKeyboardShortcuts(): void {
 
       if (isMeta && key === 's') {
         event.preventDefault()
-        saveTemplate.mutate()
+        saveTemplate()
         return
       }
 
       if (isMeta && key === 'z') {
+        if (isEditableTarget(event.target)) {
+          return
+        }
+
         event.preventDefault()
         if (event.shiftKey) {
           useEditorStore.getState().redo()
@@ -29,6 +33,10 @@ export function useKeyboardShortcuts(): void {
       }
 
       if (isMeta && key === 'y') {
+        if (isEditableTarget(event.target)) {
+          return
+        }
+
         event.preventDefault()
         useEditorStore.getState().redo()
         return

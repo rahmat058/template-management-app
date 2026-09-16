@@ -1,10 +1,11 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { templateKeys } from '@/lib/query-keys'
-import { AUTOLOAD_TEMPLATE_NAME, DEFAULT_TAB_NAME } from '@/lib/templates'
-import { useEditorStore } from '@/store/editor.store'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { useUiStore } from '@/store/ui.store'
+import { useEditorStore } from '@/store/editor.store'
 import type { TemplateSummary } from '@/types/template'
+import { AUTOLOAD_TEMPLATE_NAME, DEFAULT_TAB_NAME } from '@/lib/templates'
 
 function resolveSaveName(tabName: string, templateId: string | null, summaries: TemplateSummary[]): string {
   const trimmed = tabName.trim()
@@ -32,6 +33,7 @@ export function useSaveTemplate() {
         throw new Error('No active template to save')
       }
 
+      const { id: tabId } = tab
       const summaries = queryClient.getQueryData<TemplateSummary[]>(templateKeys.all) ?? (await api.listTemplates())
 
       const payload = {
@@ -40,17 +42,17 @@ export function useSaveTemplate() {
         version: tab.document.version,
       }
 
-      if (tab.templateId) {
-        return api.updateTemplate(tab.templateId, payload)
-      }
+      const template = tab.templateId
+        ? await api.updateTemplate(tab.templateId, payload)
+        : await api.createTemplate(payload)
 
-      return api.createTemplate(payload)
+      return { template, tabId }
     },
     onMutate: () => {
       useUiStore.getState().setSaveStatus('saving')
     },
-    onSuccess: (template) => {
-      useEditorStore.getState().markSaved(template.id, template.name)
+    onSuccess: ({ template, tabId }) => {
+      useEditorStore.getState().markSaved(tabId, template.id, template.name)
       useUiStore.getState().setSaveStatus('saved', 'Saved')
       void queryClient.invalidateQueries({ queryKey: templateKeys.all })
     },

@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef, type PointerEvent as ReactPointerEvent } from 'react'
-import { applyResize, resizeCursor, type ElementBox, type ResizeHandle } from '@/lib/element-resize'
 import { cn } from '@/lib/cn'
-import { useEditorStore } from '@/store/editor.store'
 import { useUiStore } from '@/store/ui.store'
+import { useEditorStore } from '@/store/editor.store'
+import { useCallback, useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react'
+import { applyResize, resizeCursor, type ElementBox, type ResizeHandle } from '@/lib/element-resize'
 
 const HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
 
@@ -26,14 +26,63 @@ interface ResizeHandlesProps {
   pageHeight: number
 }
 
+interface ResizeDrag {
+  handle: ResizeHandle
+  startX: number
+  startY: number
+  startBox: ElementBox
+}
+
 export function ResizeHandles({ elementId, box, pageWidth, pageHeight }: ResizeHandlesProps) {
   const resizeElement = useEditorStore((state) => state.resizeElement)
-  const dragRef = useRef<{
-    handle: ResizeHandle
-    startX: number
-    startY: number
-    startBox: ElementBox
-  } | null>(null)
+  const dragRef = useRef<ResizeDrag | null>(null)
+  const latestPointRef = useRef<{ x: number; y: number } | null>(null)
+  const frameRef = useRef(0)
+  const detachRef = useRef<(() => void) | null>(null)
+
+  // Pointermove can fire more than once per frame; buffer the latest position and write to the
+  // store at most once per animation frame instead of once per event.
+  const commit = useCallback(() => {
+    frameRef.current = 0
+
+    const drag = dragRef.current
+    const point = latestPointRef.current
+    if (!drag || !point) {
+      return
+    }
+
+    latestPointRef.current = null
+    const scale = useUiStore.getState().zoom || 1
+
+    resizeElement(
+      elementId,
+      applyResize(
+        drag.startBox,
+        drag.handle,
+        (point.x - drag.startX) / scale,
+        (point.y - drag.startY) / scale,
+        pageWidth,
+        pageHeight,
+      ),
+    )
+  }, [elementId, pageWidth, pageHeight, resizeElement])
+
+  // Detaching is what stops the window listeners. Without it an unmount mid-gesture leaves
+  // `pointermove` attached forever, resizing an element that no longer exists.
+  const detach = useCallback(() => {
+    detachRef.current?.()
+    detachRef.current = null
+
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current)
+      frameRef.current = 0
+    }
+
+    dragRef.current = null
+    latestPointRef.current = null
+  }, [])
+
+  useEffect(() => detach, [detach])
 
   const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>, handle: ResizeHandle) => {
     event.preventDefault()
@@ -50,34 +99,47 @@ export function ResizeHandles({ elementId, box, pageWidth, pageHeight }: ResizeH
     target.setPointerCapture(event.pointerId)
 
     const onPointerMove = (moveEvent: PointerEvent) => {
-      const drag = dragRef.current
-      if (!drag) {
+      if (!dragRef.current) {
         return
       }
 
-      const scale = useUiStore.getState().zoom || 1
-      const next = applyResize(
-        drag.startBox,
-        drag.handle,
-        (moveEvent.clientX - drag.startX) / scale,
-        (moveEvent.clientY - drag.startY) / scale,
-        pageWidth,
-        pageHeight,
-      )
-      resizeElement(elementId, next)
+      latestPointRef.current = { x: moveEvent.clientX, y: moveEvent.clientY }
+
+      if (frameRef.current) {
+        return
+      }
+
+      frameRef.current = requestAnimationFrame(commit)
     }
 
-    const onPointerUp = (upEvent: PointerEvent) => {
-      dragRef.current = null
-      if (target.hasPointerCapture(upEvent.pointerId)) {
-        target.releasePointerCapture(upEvent.pointerId)
+    const finish = (finishEvent: PointerEvent) => {
+      if (target.hasPointerCapture(finishEvent.pointerId)) {
+        target.releasePointerCapture(finishEvent.pointerId)
       }
-      window.removeEventListener('pointermove', onPointerMove)
-      window.removeEventListener('pointerup', onPointerUp)
+
+      if (dragRef.current) {
+        latestPointRef.current = { x: finishEvent.clientX, y: finishEvent.clientY }
+
+        if (frameRef.current) {
+          cancelAnimationFrame(frameRef.current)
+          frameRef.current = 0
+        }
+
+        commit()
+      }
+
+      detach()
     }
 
     window.addEventListener('pointermove', onPointerMove)
-    window.addEventListener('pointerup', onPointerUp)
+    window.addEventListener('pointerup', finish)
+    window.addEventListener('pointercancel', finish)
+
+    detachRef.current = () => {
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', finish)
+      window.removeEventListener('pointercancel', finish)
+    }
   }
 
   return (

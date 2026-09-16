@@ -1,9 +1,9 @@
 import { create } from 'zustand'
-import { createDefaultPages, createId, createPage, DOCUMENT_VERSION } from '@/lib/default-document'
 import type { Page } from '@/types/document'
 import type { DocumentElement } from '@/types/element'
 import { DEFAULT_TAB_NAME } from '@/lib/templates'
 import type { Template } from '@/types/template'
+import { createDefaultPages, createId, createPage, DOCUMENT_VERSION } from '@/lib/default-document'
 import { emptyHistory, uniqueHistoryKey, undoTab, redoTab, withHistory, type TabHistory } from '@/lib/editor-history'
 
 export interface EditorDocument {
@@ -35,7 +35,7 @@ interface EditorState {
   closeTab: (tabId: string) => void
   openTemplate: (template: Template) => void
   hydrateFromTemplate: (template: Template) => void
-  markSaved: (templateId: string, name: string) => void
+  markSaved: (tabId: string, templateId: string, name: string) => void
   setMode: (mode: 'edit' | 'preview') => void
   setActivePage: (pageId: string) => void
   addPage: () => void
@@ -232,8 +232,10 @@ export const useEditorStore = create<EditorState>((set, get) => {
     },
 
     hydrateFromTemplate: (template) => {
-      const current = get().getActiveTab()
-      if (current && (current.isDirty || current.templateId)) {
+      const { tabs } = get()
+      const onlyTab = tabs.length === 1 ? tabs[0] : undefined
+
+      if (!onlyTab || !isPristineUntitledTab(onlyTab)) {
         return
       }
 
@@ -245,9 +247,9 @@ export const useEditorStore = create<EditorState>((set, get) => {
       })
     },
 
-    markSaved: (templateId, name) => {
+    markSaved: (tabId, templateId, name) => {
       set((state) => ({
-        tabs: replaceActiveTab(state.tabs, state.activeTabId, (tab) => ({
+        tabs: replaceActiveTab(state.tabs, tabId, (tab) => ({
           ...tab,
           templateId,
           name,

@@ -1,8 +1,12 @@
 'use client'
 
+import { cn } from '@/lib/cn'
 import type { ReactNode } from 'react'
 import { Image as ImageIcon, MousePointer2, Plus, Square, Table2, Type } from 'lucide-react'
+
 import { PageThumbnails } from '@/components/editor/PageThumbnails'
+import { useEditorStore } from '@/store/editor.store'
+import { useUiStore } from '@/store/ui.store'
 import {
   createImageElement,
   createShapeElement,
@@ -10,18 +14,15 @@ import {
   createTextElement,
   nextElementOffset,
 } from '@/lib/document-utils'
-import { cn } from '@/lib/cn'
-import { useEditorStore } from '@/store/editor.store'
-import { useUiStore } from '@/store/ui.store'
 
 export function Toolbox() {
-  const pages = useEditorStore((state) => state.getActiveTab()?.document.pages ?? [])
-  const activePageId = useEditorStore((state) => state.getActiveTab()?.activePageId)
+  // Subscribe to the element count as a primitive: the pages array gets a new identity on every
+  // edit, so subscribing to it would re-render the whole toolbox on every keystroke.
+  const elementCount = useEditorStore((state) => state.getActivePage()?.elements.length ?? 0)
   const addElement = useEditorStore((state) => state.addElement)
   const selectElement = useEditorStore((state) => state.selectElement)
   const activeTool = useUiStore((state) => state.activeTool)
   const setActiveTool = useUiStore((state) => state.setActiveTool)
-  const activePage = pages.find((page) => page.id === activePageId)
 
   const addWithOffset = (
     factory: (offset: {
@@ -31,13 +32,12 @@ export function Toolbox() {
       typeof createTextElement | typeof createTableElement | typeof createImageElement | typeof createShapeElement
     >,
   ) => {
-    const offset = activePage ? nextElementOffset(activePage) : { x: 80, y: 80 }
-    addElement(factory(offset))
+    addElement(factory(nextElementOffset(elementCount)))
     setActiveTool('select')
   }
 
   return (
-    <aside className="bg-toolbox text-toolbox-text flex h-full min-h-0 w-[240px] shrink-0 flex-col overflow-hidden">
+    <aside className="bg-toolbox text-toolbox-text flex h-full min-h-0 w-60 shrink-0 flex-col overflow-hidden">
       <section className="p-3 pb-2">
         <h2 className="text-toolbox-subtle mb-2 px-2 text-[11px] font-semibold tracking-wide uppercase">Components</h2>
         <div className="flex flex-col gap-1">
@@ -126,7 +126,7 @@ function ToolboxItem({
       type="button"
       onClick={onClick}
       className={cn(
-        'flex h-9 items-center gap-3 rounded-[8px] px-3 text-[13px] font-medium transition-colors',
+        'flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] font-medium transition-colors',
         active ? 'bg-primary text-white' : 'text-toolbox-text hover:bg-toolbox-muted',
       )}>
       {icon}

@@ -132,12 +132,10 @@ export function createShapeElement(
   }
 }
 
-export function nextElementOffset(page: Page): { x: number; y: number } {
-  const count = page.elements.length
-  return {
-    x: 72 + (count % 4) * 16,
-    y: 72 + (count % 4) * 16,
-  }
+export function nextElementOffset(elementCount: number): { x: number; y: number } {
+  const step = (elementCount % 4) * 16
+
+  return { x: 72 + step, y: 72 + step }
 }
 
 export function addTableRow(element: TableElement): TableElement {

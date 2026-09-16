@@ -149,9 +149,9 @@ layout.tsx (server)
    and the hydration query has settled.
 3. **`useHydrateTemplate1`** fetches the template named `template1` (`AUTOLOAD_TEMPLATE_NAME`) with
    `retry: false`, then calls `hydrateFromTemplate` **once** from a `useLayoutEffect` guarded by a ref.
-4. Hydration is a **no-op when the active tab is dirty or already bound to a template id**, so an
-   autoload can never clobber in-progress work. Otherwise it replaces the pristine untitled tab,
-   which keeps the deterministic id `tab-untitled`.
+4. Hydration is a **no-op unless the store holds exactly one tab and that tab is a pristine
+   untitled tab**, so an autoload can never clobber in-progress work — including work in a
+   background tab. Otherwise it replaces that tab, keeping the deterministic id `tab-untitled`.
 5. If hydration fails, `HydrationErrorBanner` renders a danger banner with a "Try again" action
    (`retry` refetches).
 
@@ -257,10 +257,12 @@ State is `{ tabs, activeTabId, mode: "edit" | "preview" }`, seeded with one unti
 
 Behavioural details worth knowing:
 
-- `closeTab` recreates an untitled tab when the last tab is closed.
+- `closeTab` recreates an untitled tab when the last tab is closed. The tab strip confirms before
+  closing a tab that is dirty, so unsaved work is never discarded silently.
 - `openTemplate` focuses an existing tab with the same `templateId`, otherwise reuses a lone
   pristine untitled tab, otherwise creates a new tab.
-- `markSaved` clears `isDirty` and binds `templateId` + `name`.
+- `markSaved(tabId, templateId, name)` clears `isDirty` and binds `templateId` + `name` on **that tab
+  id**, never on whichever tab happens to be active when the save resolves.
 - `moveElement` clamps to `[0, page.width - element.width]` and rounds.
 - Any mutation touching pages goes through `updateActivePage`, which always sets `isDirty: true`.
 
@@ -447,17 +449,25 @@ and any detail views.
 | `useKeyboardShortcuts` | Window-level key bindings                                      |
 | `useHasMounted`        | SSR-safe mount flag                                            |
 
-`useSaveTemplate` drives the whole save lifecycle: `onMutate` → UI status `saving`; `onSuccess` →
-`markSaved(id, name)`, status `saved`, invalidate `templateKeys.all`; `onError` → status `error` with
-the message. A private `resolveSaveName` falls back to `template1` when a brand-new untitled tab is
-saved for the first time — which is exactly what makes the autoload story work on the next visit.
+`useSaveTemplate` drives the whole save lifecycle. `mutationFn` resolves the active tab **once**,
+saves it, and returns `{ template, tabId }`; `onMutate` → UI status `saving`; `onSuccess` →
+`markSaved(tabId, template.id, template.name)`, status `saved`, invalidate `templateKeys.all`;
+`onError` → status `error` with the message. Carrying the tab id through is what stops a save from
+being applied to a tab the user switched to while the request was in flight — which would otherwise
+bind that tab to the wrong `templateId` and let a later save overwrite the wrong template. A private
+`resolveSaveName` falls back to `template1` when a brand-new untitled tab is saved for the first
+time — which is exactly what makes the autoload story work on the next visit.
 
 ### Company logo upload — `src/app/api/company-logo/route.ts`
 
 A Next.js route handler exposing **`POST`** only. It reads the `file` field from `formData` and
-rejects missing/empty input, payloads over **2 MB**, and anything that is not a PNG (checked against
-the `89 50 4E 47` signature). Valid uploads are written to `public/images/company-logo.png` and the
-route returns `{ ok: true, src: "/images/company-logo.png" }`. The client side lives in
+rejects a malformed/non-multipart body and missing/empty input with `400`, payloads over **2 MB**
+(`400`), and anything that is not a PNG — checked against the full **8-byte** signature
+(`89 50 4E 47 0D 0A 1A 0A`, not just the first four bytes). The size guard runs against the declared
+`Content-Length` _before_ the body is buffered, then again against the exact `upload.size`. Valid
+uploads are written to `public/images/company-logo.png` and the route returns
+`{ ok: true, src: "/images/company-logo.png" }`; a filesystem failure returns `503` rather than an
+unhandled `500`. The client side lives in
 `lib/company-logo.ts`, which converts arbitrary images to PNG (`createImageBitmap` + canvas) before
 posting.
 
@@ -559,7 +569,22 @@ Things to know that the spec documents do not reflect:
 9. **No authentication, routing, or persistence beyond templates.** `src/app/page.tsx` renders the
    editor directly; there are no other pages or layouts.
 10. **Single-user assumptions** — the logo route writes to a shared `public/images/company-logo.png`,
-    so concurrent uploads overwrite each other.
+    so concurrent uploads overwrite each other. The write also assumes a writable filesystem, which
+    does not hold on read-only or serverless deployments (it now fails with a `503` rather than an
+    unhandled `500`, but it still cannot persist there).
+11. **The dirty flag does not track the save point across undo/redo.** `markSaved` only flips the
+    live tab's flag, while `applySnapshot` restores the `isDirty` recorded in whichever snapshot is
+    applied. Undoing back past the last save can therefore leave a changed document marked clean.
+    The same applies to edits made _while_ a save request is in flight: they are marked clean when it
+    resolves.
+12. **The history merge window is process-global** (`lib/editor-history.ts`). Merge keys are
+    namespaced per tab, so snapshots can never merge across tabs, but activity in one tab resets the
+    500 ms window for another — which can split a single drag into two undo steps.
+13. **Not yet addressed (out of scope for the audit fixes):** `Modal` has no focus trap and does not
+    restore focus on close; table row reordering is mouse-only although the handle is exposed as
+    `role="button"` with `tabIndex={0}`; `next.config.ts` carries redundant `distDir` /
+    `serverExternalPackages` entries; and `eslint.config.mjs` has a `frontend/**` ignore whose intent
+    is unclear (`@next/next` rules still apply to `src/**`).
 
 ---
 

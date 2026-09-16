@@ -29,5 +29,6 @@ export async function downloadDocumentPdf(editorDocument: EditorDocument, name: 
   window.document.body.append(link)
   link.click()
   link.remove()
-  URL.revokeObjectURL(objectUrl)
+  // Revoking synchronously can abort the download before the browser has read the blob.
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
 }
