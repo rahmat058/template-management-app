@@ -5,8 +5,15 @@ import { ZodError } from 'zod'
 import { isProduction } from '../config/env'
 import { AppError } from '../lib/app-error'
 import { sendError } from '../lib/http'
+import { requestIdOf } from './request-id'
 
-export function errorHandler(error: unknown, _req: Request, res: Response, _next: NextFunction): void {
+interface BodyParserError {
+  status?: number
+  statusCode?: number
+  type?: string
+}
+
+export function errorHandler(error: unknown, req: Request, res: Response, _next: NextFunction): void {
   if (error instanceof AppError) {
     sendError(res, error.statusCode, {
       message: error.message,
@@ -38,7 +45,29 @@ export function errorHandler(error: unknown, _req: Request, res: Response, _next
     sendError(res, httpStatus.BAD_REQUEST, {
       message: 'Database validation failed',
       code: 'DB_VALIDATION_ERROR',
-      details: error.errors,
+      // These errors echo the rejected values, so keep them out of production responses.
+      details: isProduction ? undefined : error.errors,
+    })
+    return
+  }
+
+  // express.json() rejects oversized and malformed bodies before any route runs. Without this the
+  // client sees a 500 and cannot tell a bad request from a server fault.
+  const bodyParserError = error as BodyParserError
+  const bodyParserStatus = bodyParserError.status ?? bodyParserError.statusCode
+
+  if (bodyParserStatus === httpStatus.REQUEST_ENTITY_TOO_LARGE) {
+    sendError(res, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
+      message: 'Request body is too large',
+      code: 'PAYLOAD_TOO_LARGE',
+    })
+    return
+  }
+
+  if (bodyParserError.type === 'entity.parse.failed') {
+    sendError(res, httpStatus.BAD_REQUEST, {
+      message: 'Request body is not valid JSON',
+      code: 'MALFORMED_JSON',
     })
     return
   }
@@ -54,7 +83,7 @@ export function errorHandler(error: unknown, _req: Request, res: Response, _next
 
   const message = error instanceof Error ? error.message : 'Unexpected server error'
 
-  console.error(error)
+  console.error(`❌ ${req.method} ${req.originalUrl} [${requestIdOf(res)}]`, error)
 
   sendError(res, httpStatus.INTERNAL_SERVER_ERROR, {
     message: isProduction ? 'Internal server error' : message,

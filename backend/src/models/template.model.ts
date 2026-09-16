@@ -136,7 +136,10 @@ const templateSchema = new Schema(
   },
 )
 
-templateSchema.index({ name: 1 })
+// Unique so a duplicate name cannot silently shadow the frontend's `by-name` autoload. Built at
+// boot outside production only — `npm run indexes` applies it explicitly, because the build fails
+// if duplicates already exist and that must not block startup.
+templateSchema.index({ name: 1 }, { unique: true })
 templateSchema.index({ updatedAt: -1 })
 
 export interface TemplateDocument extends MongoDocument {

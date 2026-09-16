@@ -58,10 +58,11 @@ copy .env.example .env    # macOS/Linux: cp .env.example .env
 NODE_ENV=development
 PORT=4000
 CORS_ORIGIN=http://localhost:3000
+TRUST_PROXY=0
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/template_management?retryWrites=true&w=majority
 ```
 
-Use your Atlas connection string and keep the database name `template_management` in the URI. The API validates these values at startup with Zod and exits immediately if one is missing or malformed. Do not commit `.env`.
+`NODE_ENV` and `MONGODB_URI` are the only required values; the rest have defaults. Use your Atlas connection string and keep the database name `template_management` in the URI. The API validates these at startup with Zod and exits immediately if one is missing or malformed — including `NODE_ENV`, which has no default, so a deploy that forgets it fails at boot instead of silently running in development mode, where the `500` handler returns raw internal error messages. `TRUST_PROXY` is the number of proxies in front of the API: leave it `0` locally, and set it to `1` when deployed behind a single load balancer or ingress so rate limiting and logs see the real client IP. Do not commit `.env`.
 
 5. Start the API with nodemon:
 
@@ -81,6 +82,7 @@ Run the frontend in a **separate terminal** (`cd frontend` then `npm run dev`).
 | `npm run build`         | Compile TypeScript to `dist/`                   |
 | `npm run start`         | Run the compiled server (`node dist/server.js`) |
 | `npm run seed`          | Clear `templates` and insert the default set    |
+| `npm run indexes`       | Duplicate pre-check, then sync the DB indexes   |
 | `npm test`              | Run the Jest suite, one test file at a time     |
 | `npm run test:watch`    | Jest in watch mode                              |
 | `npm run test:coverage` | Jest with a V8 coverage report                  |
@@ -98,7 +100,19 @@ npm run seed
 
 The seeder connects with `MONGODB_URI`, **deletes every document in `templates`**, then inserts the default set from `src/seed/default-templates.ts` — currently a single `template1` document that mirrors the editor's default document, so the frontend autoload finds it.
 
+Because it wipes the collection, it refuses to run when `NODE_ENV=production` unless `SEED_ALLOW_PRODUCTION=1` is explicitly set, and it logs the database it is about to target before deleting anything. Never point `npm run seed` at production.
+
 Seeding only writes to MongoDB; it does **not** start the API. The editor loads `template1` over HTTP, so the API must also be running (`npm run dev`) or the frontend will report "Could not load the saved template".
+
+## Indexes
+
+```bash
+npm run indexes
+```
+
+`name` is **uniquely** indexed, so two templates cannot share a name — a duplicate save returns `409` with code `DUPLICATE_KEY`. Outside production Mongoose builds the indexes automatically at startup; in production `autoIndex` is off and this script applies them explicitly, so a failed index build can never block the API from booting.
+
+Run it after any schema index change. It prints the target database, checks for names that already collide and **aborts with the offending names listed** rather than dropping anything (a unique index cannot be built over duplicates), reports what `diffIndexes()` would create and drop, then applies `syncIndexes()`. Resolve reported duplicates and re-run.
 
 ## Testing
 
@@ -108,13 +122,13 @@ npm run test:watch      # watch mode
 npm run test:coverage   # writes coverage/ (V8)
 ```
 
-Tests live in `test/`, mirroring the `src/` layout — `test/lib`, `test/middleware`, `test/modules`, `test/seed`, `test/validators`. A test for `src/foo/bar.ts` belongs at `test/foo/bar.test.ts`, importing it as `../../src/foo/bar`. They run on Jest with `ts-jest` and `--runInBand`, so the suites run sequentially rather than in parallel workers.
+Tests live in `test/`, mirroring the `src/` layout — `test/lib`, `test/middleware`, `test/modules`, `test/scripts`, `test/seed`, `test/validators`. A test for `src/foo/bar.ts` belongs at `test/foo/bar.test.ts`, importing it as `../../src/foo/bar`. They run on Jest with `ts-jest` and `--runInBand`, so the suites run sequentially rather than in parallel workers.
 
 They are pure unit tests — no MongoDB connection is needed, so they run offline. `tsconfig.json` includes both `src` and `test` so `npm run typecheck` also checks the tests, while `tsconfig.build.json` compiles `src` only and keeps the tests out of `dist/`.
 
 ## API endpoints
 
-All routes are mounted under `/api`. Responses are `{ "data": … }` on success and `{ "error": { "message", "code", "details"? } }` on failure.
+All routes are mounted under `/api`. Responses are `{ "success": true, "data": … }` on success and `{ "success": false, "error": { "message", "code", "details"? } }` on failure, with the status code only on the status line.
 
 | Method   | Path                           | Description                           |
 | -------- | ------------------------------ | ------------------------------------- |
@@ -151,12 +165,13 @@ The health route returns `503` with `"status": "degraded"` when the database is 
 
 ```text
 src/
-├── app.ts                 Express app (CORS, helmet, rate limit, JSON)
-├── server.ts              Database connect + HTTP listen
+├── app.ts                 Express app (helmet, CORS, request id, compression, rate limit, JSON)
+├── server.ts              Database connect + HTTP listen, timeouts, graceful shutdown
 ├── config/                Env validation and MongoDB connection
 ├── lib/                   AppError, async handler, response helpers
-├── middleware/            Validation, 404, and error handler
+├── middleware/            Request id, validation, 404, and error handler
 ├── models/                Mongoose Template schema
+├── scripts/               Duplicate pre-check + explicit index sync
 ├── seed/                  Default template data + clear-and-seed runner
 ├── modules/
 │   ├── health/            Health route
@@ -168,11 +183,12 @@ src/
 
 ## How it works
 
-- `server.ts` retries the initial MongoDB connection up to 8 times before giving up, then closes the HTTP server on `SIGINT`/`SIGTERM`.
-- `app.ts` applies helmet, CORS, a 2 MB JSON limit, a 120 requests/minute rate limit, and request logging before the `/api` router.
+- `server.ts` retries the initial MongoDB connection up to 8 times before giving up. On `SIGINT`/`SIGTERM` it stops accepting connections, lets in-flight requests finish, closes the Mongo pool, and exits; unhandled rejections are logged without exiting, and an uncaught exception drains and exits.
+- `app.ts` applies helmet, CORS, a request id, compression, a 120 requests/minute rate limit, the 2 MB JSON parsers, and request logging before the `/api` router.
+- Every response carries an `X-Request-Id` header — the inbound one when it is a safe token, otherwise a generated UUID — and a `500` logs the same id, so a reported error can be traced back to its request.
 - Each route declares its own Zod validation, so an invalid body or id is rejected with `400` before any handler runs.
-- Controllers stay thin: they call the service and hand the result to a mapper that converts `_id` to `id` and dates to ISO strings.
-- One error handler turns every failure — validation, bad id, duplicate key, or unexpected — into the same JSON shape with a stable `code`.
+- Controllers stay thin: they call the service and hand the result to a mapper that converts `_id` to `id` and dates to ISO strings. Reads use `.lean()` and the list endpoint aggregates `pageCount` in MongoDB, so pages and elements are never fetched just to be counted.
+- One error handler turns every failure — validation, bad id, oversized or malformed body, duplicate key, or unexpected — into the same JSON shape with a stable `code`.
 
 ## Troubleshooting
 

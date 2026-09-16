@@ -1,3 +1,4 @@
+import compression from 'compression'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
@@ -8,32 +9,45 @@ import { env } from './config/env'
 import { apiRouter } from './routes'
 import { errorHandler } from './middleware/error-handler'
 import { notFoundHandler } from './middleware/not-found'
+import { REQUEST_ID_HEADER, requestId, requestIdOf } from './middleware/request-id'
+
+const PRODUCTION_LOG_FORMAT = ':requestId :remote-addr :method :url :status :res[content-length] - :response-time ms'
 
 export function createApp() {
   const app = express()
 
   app.disable('x-powered-by')
+  // Needed for correct client IPs (and therefore correct rate limiting and logs) behind a proxy.
+  app.set('trust proxy', env.TRUST_PROXY)
   app.use(helmet())
   app.use(
     cors({
       origin: env.CORS_ORIGIN,
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
+      exposedHeaders: [REQUEST_ID_HEADER],
+      maxAge: 86_400,
     }),
   )
-  app.use(express.json({ limit: '2mb' }))
-  app.use(express.urlencoded({ extended: false }))
+  app.use(requestId)
+  app.use(compression())
+  // Ahead of the body parsers so a request is counted before the server parses up to 2 MB for it.
+  // Health checks are skipped so load-balancer probes do not consume the shared quota.
   app.use(
     rateLimit({
       windowMs: 60_000,
       limit: 120,
       standardHeaders: true,
       legacyHeaders: false,
+      skip: (req) => req.path === '/api/health',
     }),
   )
+  app.use(express.json({ limit: '2mb' }))
+  app.use(express.urlencoded({ extended: false }))
 
   if (env.NODE_ENV !== 'test') {
-    app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'))
+    morgan.token('requestId', (_req, res) => requestIdOf(res))
+    app.use(morgan(env.NODE_ENV === 'production' ? PRODUCTION_LOG_FORMAT : 'dev'))
   }
 
   app.use('/api', apiRouter)

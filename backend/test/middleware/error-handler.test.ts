@@ -16,17 +16,23 @@ jest.mock('../../src/config/env', () => ({
 interface MockResponse {
   status: jest.Mock
   json: jest.Mock
+  locals: Record<string, unknown>
 }
 
-function createResponse(): MockResponse {
+function createResponse(locals: Record<string, unknown> = { requestId: 'req-1' }): MockResponse {
   return {
     status: jest.fn().mockReturnThis(),
     json: jest.fn().mockReturnThis(),
+    locals,
   }
 }
 
 function asResponse(res: MockResponse): Response {
   return res as unknown as Response
+}
+
+function errorBody(res: MockResponse): { message: string; code: string; details?: unknown } {
+  return res.json.mock.calls[0][0].error
 }
 
 function createZodError(): z.ZodError {
@@ -39,7 +45,7 @@ function createZodError(): z.ZodError {
   return parsed.error
 }
 
-const request = {} as Request
+const request = { method: 'POST', originalUrl: '/api/templates' } as Request
 const next = jest.fn() as unknown as NextFunction
 
 describe('errorHandler', () => {
@@ -123,6 +129,19 @@ describe('errorHandler', () => {
     })
   })
 
+  it('hides the rejected values of a database validation failure in production', () => {
+    mockIsProduction = true
+    const res = createResponse()
+    const error = new mongoose.Error.ValidationError()
+    error.addError('name', new mongoose.Error.ValidatorError({ message: 'Name is required', path: 'name' }))
+
+    errorHandler(error, request, asResponse(res), next)
+
+    expect(res.status).toHaveBeenCalledWith(httpStatus.BAD_REQUEST)
+    expect(errorBody(res).code).toBe('DB_VALIDATION_ERROR')
+    expect(errorBody(res).details).toBeUndefined()
+  })
+
   it('renders a duplicate key error as a conflict', () => {
     const res = createResponse()
     const duplicate = Object.assign(new Error('E11000 duplicate key error'), { code: 11000 })
@@ -139,6 +158,35 @@ describe('errorHandler', () => {
     })
   })
 
+  it('maps an oversized body to 413 instead of falling through to 500', () => {
+    const res = createResponse()
+    const tooLarge = Object.assign(new Error('request entity too large'), {
+      status: httpStatus.REQUEST_ENTITY_TOO_LARGE,
+      type: 'entity.too.large',
+    })
+
+    errorHandler(tooLarge, request, asResponse(res), next)
+
+    expect(res.status).toHaveBeenCalledWith(httpStatus.REQUEST_ENTITY_TOO_LARGE)
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: { message: 'Request body is too large', code: 'PAYLOAD_TOO_LARGE' },
+    })
+  })
+
+  it('maps a malformed JSON body to 400 instead of falling through to 500', () => {
+    const res = createResponse()
+    const malformed = Object.assign(new SyntaxError('Unexpected token'), { type: 'entity.parse.failed' })
+
+    errorHandler(malformed, request, asResponse(res), next)
+
+    expect(res.status).toHaveBeenCalledWith(httpStatus.BAD_REQUEST)
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: { message: 'Request body is not valid JSON', code: 'MALFORMED_JSON' },
+    })
+  })
+
   it('logs and exposes the message of an unknown error outside production', () => {
     const res = createResponse()
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
@@ -146,12 +194,22 @@ describe('errorHandler', () => {
 
     errorHandler(unknown, request, asResponse(res), next)
 
-    expect(consoleError).toHaveBeenCalledWith(unknown)
+    expect(consoleError).toHaveBeenCalledWith('❌ POST /api/templates [req-1]', unknown)
     expect(res.status).toHaveBeenCalledWith(httpStatus.INTERNAL_SERVER_ERROR)
     expect(res.json).toHaveBeenCalledWith({
       success: false,
       error: { message: 'database is on fire', code: 'INTERNAL_ERROR' },
     })
+  })
+
+  it('still logs when the response carries no request id', () => {
+    const res = createResponse({})
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const unknown = new Error('nope')
+
+    errorHandler(unknown, request, asResponse(res), next)
+
+    expect(consoleError).toHaveBeenCalledWith('❌ POST /api/templates [-]', unknown)
   })
 
   it('falls back to a generic message for a thrown non-Error', () => {
