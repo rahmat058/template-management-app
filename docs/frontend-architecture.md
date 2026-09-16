@@ -321,7 +321,7 @@ EditorShell (h-screen flex column)
 | `ElementRenderer`   | Memoized dispatcher: positions wrapper, applies drag transform, renders resize handles                                                      |
 | `MoveHandle`        | Grip for text/table drag (those two do **not** drag from the wrapper)                                                                       |
 | `ResizeHandles`     | 8 directional handles driving `applyResize`                                                                                                 |
-| `PageThumbnails`    | Mini page previews (scaled to 72 px height) with select/delete/add                                                                          |
+| `PageThumbnails`    | Live mini-renders of each page — reuses the real element components at `interactive={false}`, scaled via a measured width                   |
 | `PreviewMode`       | Read-only full-screen canvas (`interactive={false}`) + PDF + back to edit                                                                   |
 | `PropertiesPanel`   | Type-dispatched settings, element actions                                                                                                   |
 | `SavedTemplates`    | Full-width bar docked to the canvas bottom, below the scroll area (edit mode only); Open fetches → `openTemplate`, Delete via confirm modal |
