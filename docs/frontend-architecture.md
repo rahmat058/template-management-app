@@ -5,11 +5,11 @@
 This document describes the **frontend as it is actually implemented** in `frontend/`. It is the
 counterpart to the forward-looking specification docs in this folder:
 
-| Document | Describes |
-|---|---|
-| `PRD.md` | Product requirements and user journeys |
-| `design.md` | Intended design system and layout |
-| `database-schema.md` | MongoDB collections and Mongoose schemas |
+| Document                                   | Describes                                                     |
+| ------------------------------------------ | ------------------------------------------------------------- |
+| `PRD.md`                                   | Product requirements and user journeys                        |
+| `design.md`                                | Intended design system and layout                             |
+| `database-schema.md`                       | MongoDB collections and Mongoose schemas                      |
 | **`frontend-architecture.md`** (this file) | The shipped Next.js frontend: structure, state, and data flow |
 
 Where the implementation diverges from the specs, see §15.
@@ -21,10 +21,10 @@ Where the implementation diverges from the specs, see §15.
 The repository uses two agent-instruction files. This document deliberately **points at them**
 rather than duplicating their content, because their content is generated, not authored.
 
-| File | Status | Content |
-|---|---|---|
-| `AGENTS.md` (repo root) | Mixed | The auto-generated `<!-- BEGIN:nextjs-agent-rules -->` block, plus an authored **Project Documentation** section linking to this `docs/` folder |
-| `frontend/CLAUDE.md` | Authored | A single line, `@AGENTS.md` — delegates to the file above |
+| File                    | Status   | Content                                                                                                                                         |
+| ----------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` (repo root) | Mixed    | The auto-generated `<!-- BEGIN:nextjs-agent-rules -->` block, plus an authored **Project Documentation** section linking to this `docs/` folder |
+| `frontend/CLAUDE.md`    | Authored | A single line, `@AGENTS.md` — delegates to the file above                                                                                       |
 
 `AGENTS.md` warns that this Next.js version differs from model training data and that the
 authoritative guide ships inside the package at:
@@ -34,7 +34,7 @@ frontend/node_modules/next/dist/docs/
 ```
 
 The root `AGENTS.md` also carries a hand-written **Project Documentation** section that links back
-to this file and its siblings. It sits *outside* the managed markers, so it survives regeneration.
+to this file and its siblings. It sits _outside_ the managed markers, so it survives regeneration.
 
 ### How the managed block behaves
 
@@ -61,19 +61,19 @@ to this file and its siblings. It sits *outside* the managed markers, so it surv
 
 ## 3. Stack
 
-| Concern | Choice | Version |
-|---|---|---|
-| Framework | Next.js (App Router, Turbopack) | `16.3.5` |
-| UI | React / React DOM | `19.2.8` |
-| Language | TypeScript (`strict`, `noImplicitAny`) | `^5` |
-| Styling | Tailwind CSS v4 via `@tailwindcss/postcss` | `^4` |
-| Client state | Zustand | `^5.0.15` |
-| Server state | TanStack Query | `^5.102.8` |
-| Drag & drop | `@dnd-kit/core`, `/sortable`, `/utilities` | `^6.3.1` |
-| PDF | `@react-pdf/renderer` | `^4.9.0` |
-| Icons | `lucide-react` | `^1.46.0` |
-| Dates | `date-fns` | `^4.4.0` |
-| Class utils | `clsx` + `tailwind-merge` | — |
+| Concern       | Choice                                                       | Version      |
+| ------------- | ------------------------------------------------------------ | ------------ |
+| Framework     | Next.js (App Router, Turbopack)                              | `16.3.5`     |
+| UI            | React / React DOM                                            | `19.2.8`     |
+| Language      | TypeScript (`strict`, `noImplicitAny`)                       | `^5`         |
+| Styling       | Tailwind CSS v4 via `@tailwindcss/postcss`                   | `^4`         |
+| Client state  | Zustand                                                      | `^5.0.15`    |
+| Server state  | TanStack Query                                               | `^5.102.8`   |
+| Drag & drop   | `@dnd-kit/core`, `/sortable`, `/utilities`                   | `^6.3.1`     |
+| PDF           | `@react-pdf/renderer`                                        | `^4.9.0`     |
+| Icons         | `lucide-react`                                               | `^1.46.0`    |
+| Dates         | `date-fns`                                                   | `^4.4.0`     |
+| Class utils   | `clsx` + `tailwind-merge`                                    | —            |
 | Lint / format | ESLint flat config + Prettier (tailwind + css-order plugins) | `^9`, `^3.9` |
 
 Notable configuration:
@@ -89,13 +89,13 @@ Notable configuration:
 
 ### Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Next.js dev server (Turbopack) on port 3000 |
-| `npm run build` / `npm run start` | Production build / serve |
-| `npm run lint` / `npm run lint:fix` | ESLint over `.` |
-| `npm run format` / `npm run format:check` | Prettier write / check |
-| `npm run typecheck` | `tsc --noEmit` |
+| Command                                   | Description                                 |
+| ----------------------------------------- | ------------------------------------------- |
+| `npm run dev`                             | Next.js dev server (Turbopack) on port 3000 |
+| `npm run build` / `npm run start`         | Production build / serve                    |
+| `npm run lint` / `npm run lint:fix`       | ESLint over `.`                             |
+| `npm run format` / `npm run format:check` | Prettier write / check                      |
+| `npm run typecheck`                       | `tsc --noEmit`                              |
 
 There is **no test runner configured** in this package.
 
@@ -105,7 +105,9 @@ There is **no test runner configured** in this package.
 
 ```text
 frontend/
-├── public/images/icon.png        Company logo written by the API route
+├── public/images/                Brand assets
+│   ├── company-logo.png          Company logo, rewritten by the API route
+│   └── footer-logo.png           Footer logo used by the default document
 └── src/
     ├── app/                      App Router entry
     │   ├── layout.tsx            Root layout, Inter font, <Providers>
@@ -163,16 +165,16 @@ drag handlers are never attached during SSR — this is what prevents hydration 
 ### Pages and units — `document.ts`
 
 ```ts
-export const A4_PORTRAIT = { width: 794, height: 1123 } as const;
-export const DOCUMENT_VERSION = 1;
+export const A4_PORTRAIT = { width: 794, height: 1123 } as const
+export const DOCUMENT_VERSION = 1
 
 interface Page {
-  id: string;
-  order: number;      // 0-based page ordering
-  width: number;      // 794
-  height: number;     // 1123
-  background: string; // "#ffffff"
-  elements: DocumentElement[];
+  id: string
+  order: number // 0-based page ordering
+  width: number // 794
+  height: number // 1123
+  background: string // "#ffffff"
+  elements: DocumentElement[]
 }
 ```
 
@@ -189,19 +191,25 @@ A discriminated union on `type`:
 
 ```ts
 interface BaseElement {
-  id: string; x: number; y: number; width: number; height: number;
-  zIndex: number; locked: boolean; visible: boolean;
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+  zIndex: number
+  locked: boolean
+  visible: boolean
 }
 
-type DocumentElement = TextElement | TableElement | ImageElement | ShapeElement;
+type DocumentElement = TextElement | TableElement | ImageElement | ShapeElement
 ```
 
-| Type | Payload | Notes |
-|---|---|---|
-| `text` | `{ content, fontFamily, fontSize, fontWeight, color, align }` | `fontFamily` is typed `string`, not the `FontFamily` union |
-| `table` | `{ columns, rows, borderWidth, borderColor, cellPadding, rowSpacing }` | `TableRow { id, cells }`, `TableCell { id, value }` |
-| `image` | `{ src, alt?, objectFit }` | `objectFit: contain \| cover \| fill` |
-| `shape` | `{ kind, fill, borderColor, borderWidth, borderRadius }` | `kind: rectangle \| circle \| line` |
+| Type    | Payload                                                                | Notes                                                      |
+| ------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `text`  | `{ content, fontFamily, fontSize, fontWeight, color, align }`          | `fontFamily` is typed `string`, not the `FontFamily` union |
+| `table` | `{ columns, rows, borderWidth, borderColor, cellPadding, rowSpacing }` | `TableRow { id, cells }`, `TableCell { id, value }`        |
+| `image` | `{ src, alt?, objectFit }`                                             | `objectFit: contain \| cover \| fill`                      |
+| `shape` | `{ kind, fill, borderColor, borderWidth, borderRadius }`               | `kind: rectangle \| circle \| line`                        |
 
 Supporting const tuples: `ELEMENT_TYPES`, `TEXT_ALIGNS`, `IMAGE_OBJECT_FITS`, `SHAPE_KINDS`,
 `FONT_FAMILIES` (`Inter`, `Arial`, `Helvetica`, `Georgia`, `Times New Roman`).
@@ -225,27 +233,27 @@ Supporting const tuples: `ELEMENT_TYPES`, `TEXT_ALIGNS`, `IMAGE_OBJECT_FITS`, `S
 
 ```ts
 interface EditorTab {
-  id: string;
-  name: string;
-  templateId: string | null;
-  document: { pages: Page[]; version: number };
-  activePageId: string;
-  selectedElementId: string | null;
-  isDirty: boolean;
-  history: TabHistory;
+  id: string
+  name: string
+  templateId: string | null
+  document: { pages: Page[]; version: number }
+  activePageId: string
+  selectedElementId: string | null
+  isDirty: boolean
+  history: TabHistory
 }
 ```
 
 State is `{ tabs, activeTabId, mode: "edit" | "preview" }`, seeded with one untitled tab named
 `New-Template` and the deterministic id `tab-untitled`.
 
-| Group | Actions |
-|---|---|
-| Read | `getActiveTab`, `getActivePage`, `getSelectedElement` |
-| Tabs | `setActiveTab`, `setTabName`, `createTab`, `closeTab`, `openTemplate`, `hydrateFromTemplate`, `markSaved` |
-| Mode / pages | `setMode`, `setActivePage`, `addPage`, `removePage` |
-| Elements | `selectElement`, `addElement`, `moveElement`, `resizeElement`, `updateElement`, `updatePage`, `removeSelectedElement` |
-| History | `undo`, `redo` |
+| Group        | Actions                                                                                                               |
+| ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Read         | `getActiveTab`, `getActivePage`, `getSelectedElement`                                                                 |
+| Tabs         | `setActiveTab`, `setTabName`, `createTab`, `closeTab`, `openTemplate`, `hydrateFromTemplate`, `markSaved`             |
+| Mode / pages | `setMode`, `setActivePage`, `addPage`, `removePage`                                                                   |
+| Elements     | `selectElement`, `addElement`, `moveElement`, `resizeElement`, `updateElement`, `updatePage`, `removeSelectedElement` |
+| History      | `undo`, `redo`                                                                                                        |
 
 Behavioural details worth knowing:
 
@@ -302,22 +310,22 @@ EditorShell (h-screen flex column)
     └── PropertiesPanel    320px: selected-element settings or PageSettings + SavedTemplates
 ```
 
-| Component | Role |
-|---|---|
-| `EditorShell` | Layout, hydration gate, preview switch, error banner |
-| `EditorHeader` | Branding, project-name input, save status, undo/redo, mode toggle, save, PDF |
-| `TemplateTabs` | Per-tab navigation, dirty indicators, close, create |
-| `Toolbox` | Adds Text / Table / Image / Shape via factories + `nextElementOffset`, hosts `PageThumbnails` |
-| `Canvas` | Zoom control and page list; delegates to `CanvasPage` |
-| `CanvasPage` | One page surface; owns the `DndContext` (`EditorPointerSensor`, `distance: 6`) |
-| `ElementRenderer` | Memoized dispatcher: positions wrapper, applies drag transform, renders resize handles |
-| `MoveHandle` | Grip for text/table drag (those two do **not** drag from the wrapper) |
-| `ResizeHandles` | 8 directional handles driving `applyResize` |
-| `PageThumbnails` | Mini page previews (scaled to 72 px height) with select/delete/add |
-| `PreviewMode` | Read-only full-screen canvas (`interactive={false}`) + PDF + back to edit |
-| `PropertiesPanel` | Type-dispatched settings, element actions, saved-template list |
-| `SavedTemplates` | Template list with Open (fetch → `openTemplate`) and confirm-modal Delete |
-| `DownloadPdfButton` | Trigger for `useExportPdf` |
+| Component           | Role                                                                                          |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| `EditorShell`       | Layout, hydration gate, preview switch, error banner                                          |
+| `EditorHeader`      | Branding, project-name input, save status, undo/redo, mode toggle, save, PDF                  |
+| `TemplateTabs`      | Per-tab navigation, dirty indicators, close, create                                           |
+| `Toolbox`           | Adds Text / Table / Image / Shape via factories + `nextElementOffset`, hosts `PageThumbnails` |
+| `Canvas`            | Zoom control and page list; delegates to `CanvasPage`                                         |
+| `CanvasPage`        | One page surface; owns the `DndContext` (`EditorPointerSensor`, `distance: 6`)                |
+| `ElementRenderer`   | Memoized dispatcher: positions wrapper, applies drag transform, renders resize handles        |
+| `MoveHandle`        | Grip for text/table drag (those two do **not** drag from the wrapper)                         |
+| `ResizeHandles`     | 8 directional handles driving `applyResize`                                                   |
+| `PageThumbnails`    | Mini page previews (scaled to 72 px height) with select/delete/add                            |
+| `PreviewMode`       | Read-only full-screen canvas (`interactive={false}`) + PDF + back to edit                     |
+| `PropertiesPanel`   | Type-dispatched settings, element actions, saved-template list                                |
+| `SavedTemplates`    | Template list with Open (fetch → `openTemplate`) and confirm-modal Delete                     |
+| `DownloadPdfButton` | Trigger for `useExportPdf`                                                                    |
 
 `Canvas` accepts `{ interactive = true, pageIds? }`, which is what lets `PreviewMode` reuse the exact
 same rendering path with interactions disabled.
@@ -353,11 +361,11 @@ function that:
 
 ### Rendering
 
-| Component | Highlights |
-|---|---|
-| `TextElement` | Renders a `<textarea class="canvas-text-input">` when interactive, otherwise plain text; typography inherited from the model; selects all on focus |
-| `ImageElement` | Dashed placeholder when `src` is empty; logo variant gets rounded corners; uses a raw `<img>` (the `next/image` rule is disabled locally) |
-| `ShapeElement` | Three paths — `line` (centered bar), `circle` (`borderRadius: 999`), `rectangle` |
+| Component      | Highlights                                                                                                                                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TextElement`  | Renders a `<textarea class="canvas-text-input">` when interactive, otherwise plain text; typography inherited from the model; selects all on focus                                                               |
+| `ImageElement` | Dashed placeholder when `src` is empty; logo variant gets rounded corners; uses a raw `<img>` (the `next/image` rule is disabled locally)                                                                        |
+| `ShapeElement` | Three paths — `line` (centered bar), `circle` (`borderRadius: 999`), `rectangle`                                                                                                                                 |
 | `TableElement` | `<table>` with `border-separate` + `borderSpacing` from `rowSpacing`; header row detected when the first cell trims to `"#"`; interactive rows are sortable via a nested `DndContext`; a footer "Add Row" button |
 
 Table subcomponents: `table-layout.ts` (pure column-width and `isIndexedTable` math),
@@ -373,17 +381,17 @@ values.
 
 ## 11. Properties Panels (`src/components/editor/properties/`)
 
-| Panel | Coverage |
-|---|---|
-| `TextSettings` | Font family, size (8–96), weight (400/500/600/700), color, alignment, content |
-| `TableSettings` | Border width/color, padding, row spacing, add/delete column, add/delete row |
-| `ImageSettings` | File replace (converted to PNG), image URL, alt text, alignment, object fit |
-| `ShapeSettings` | Kind, fill, border color, border width, radius |
-| `PageSettings` | Read-only dimensions, background color |
-| `PositionSizeFields` | 2×2 numeric grid for x / y / width / height |
-| `ElementActions` | Danger "Delete" action |
-| `ImageAlignControls` | Left/center/right, computed against `PAGE_MARGIN = 56` |
-| `SectionTitle`, `PanelAction`, `color.ts` | Shared chrome and a `toColorInput` hex guard |
+| Panel                                     | Coverage                                                                      |
+| ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `TextSettings`                            | Font family, size (8–96), weight (400/500/600/700), color, alignment, content |
+| `TableSettings`                           | Border width/color, padding, row spacing, add/delete column, add/delete row   |
+| `ImageSettings`                           | File replace (converted to PNG), image URL, alt text, alignment, object fit   |
+| `ShapeSettings`                           | Kind, fill, border color, border width, radius                                |
+| `PageSettings`                            | Read-only dimensions, background color                                        |
+| `PositionSizeFields`                      | 2×2 numeric grid for x / y / width / height                                   |
+| `ElementActions`                          | Danger "Delete" action                                                        |
+| `ImageAlignControls`                      | Left/center/right, computed against `PAGE_MARGIN = 56`                        |
+| `SectionTitle`, `PanelAction`, `color.ts` | Shared chrome and a `toColorInput` hex guard                                  |
 
 All panels commit through `updateElement(id, updater, historyKey?)`.
 
@@ -400,15 +408,15 @@ returns `undefined` for `204`, unwraps the `{ data }` envelope on success, and t
 `ApiClientError { message, status, code, details }` parsed from the backend
 `{ error: { message, code, details } }` shape.
 
-| `api` method | HTTP | Path |
-|---|---|---|
-| `getHealth()` | GET | `/health` |
-| `listTemplates()` | GET | `/templates` |
-| `getTemplate(id)` | GET | `/templates/:id` |
-| `getTemplateByName(name)` | GET | `/templates/by-name/:name` (404 → `null`) |
-| `createTemplate(input)` | POST | `/templates` |
-| `updateTemplate(id, input)` | PATCH | `/templates/:id` |
-| `deleteTemplate(id)` | DELETE | `/templates/:id` |
+| `api` method                | HTTP   | Path                                      |
+| --------------------------- | ------ | ----------------------------------------- |
+| `getHealth()`               | GET    | `/health`                                 |
+| `listTemplates()`           | GET    | `/templates`                              |
+| `getTemplate(id)`           | GET    | `/templates/:id`                          |
+| `getTemplateByName(name)`   | GET    | `/templates/by-name/:name` (404 → `null`) |
+| `createTemplate(input)`     | POST   | `/templates`                              |
+| `updateTemplate(id, input)` | PATCH  | `/templates/:id`                          |
+| `deleteTemplate(id)`        | DELETE | `/templates/:id`                          |
 
 ### Server caching — `src/lib/query-client.ts`, `query-keys.ts`
 
@@ -416,9 +424,9 @@ Defaults: `staleTime: 30_000`, `retry: 1`, `refetchOnWindowFocus: false`, mutati
 
 ```ts
 templateKeys = {
-  all:            ["templates"],
-  byName: (name) => ["templates", "by-name", name],
-  detail: (id)   => ["templates", id],
+  all: ['templates'],
+  byName: (name) => ['templates', 'by-name', name],
+  detail: (id) => ['templates', id],
 }
 ```
 
@@ -427,16 +435,16 @@ and any detail views.
 
 ### Hooks
 
-| Hook | Behaviour |
-|---|---|
-| `useTemplates` | List query |
-| `useTemplate(id)` | Detail query, `enabled: Boolean(id)` |
-| `useHydrateTemplate1` | Autoload `template1` once, exposes `{ isReady, error, retry }` |
-| `useSaveTemplate` | Mutation: PATCH when the tab has a `templateId`, else POST |
-| `useExportPdf` | `{ exportPdf, isExporting, error }` |
-| `useEditorSelection` | The selected element from the active tab/page |
-| `useKeyboardShortcuts` | Window-level key bindings |
-| `useHasMounted` | SSR-safe mount flag |
+| Hook                   | Behaviour                                                      |
+| ---------------------- | -------------------------------------------------------------- |
+| `useTemplates`         | List query                                                     |
+| `useTemplate(id)`      | Detail query, `enabled: Boolean(id)`                           |
+| `useHydrateTemplate1`  | Autoload `template1` once, exposes `{ isReady, error, retry }` |
+| `useSaveTemplate`      | Mutation: PATCH when the tab has a `templateId`, else POST     |
+| `useExportPdf`         | `{ exportPdf, isExporting, error }`                            |
+| `useEditorSelection`   | The selected element from the active tab/page                  |
+| `useKeyboardShortcuts` | Window-level key bindings                                      |
+| `useHasMounted`        | SSR-safe mount flag                                            |
 
 `useSaveTemplate` drives the whole save lifecycle: `onMutate` → UI status `saving`; `onSuccess` →
 `markSaved(id, name)`, status `saved`, invalidate `templateKeys.all`; `onError` → status `error` with
@@ -447,9 +455,10 @@ saved for the first time — which is exactly what makes the autoload story work
 
 A Next.js route handler exposing **`POST`** only. It reads the `file` field from `formData` and
 rejects missing/empty input, payloads over **2 MB**, and anything that is not a PNG (checked against
-the `89 50 4E 47` signature). Valid uploads are written to `public/images/icon.png` and the route
-returns `{ ok: true, src: "/images/icon.png" }`. The client side lives in `lib/company-logo.ts`,
-which converts arbitrary images to PNG (`createImageBitmap` + canvas) before posting.
+the `89 50 4E 47` signature). Valid uploads are written to `public/images/company-logo.png` and the
+route returns `{ ok: true, src: "/images/company-logo.png" }`. The client side lives in
+`lib/company-logo.ts`, which converts arbitrary images to PNG (`createImageBitmap` + canvas) before
+posting.
 
 ---
 
@@ -475,9 +484,9 @@ useExportPdf
 **Fonts are the important limitation.** `lib/pdf/pdf-fonts.ts` maps onto the built-in PDF standard
 fonts only — no font registration or embedding:
 
-| Model family | PDF font |
-|---|---|
-| `Georgia`, `Times New Roman` | `Times-Roman` / `Times-Bold` (weight ≥ 600) |
+| Model family                                          | PDF font                                      |
+| ----------------------------------------------------- | --------------------------------------------- |
+| `Georgia`, `Times New Roman`                          | `Times-Roman` / `Times-Bold` (weight ≥ 600)   |
 | everything else (incl. `Inter`, `Arial`, `Helvetica`) | `Helvetica` / `Helvetica-Bold` (weight ≥ 600) |
 
 Since the canvas uses Inter, **exported text will not match the on-screen typeface**.
@@ -493,13 +502,13 @@ properties as utilities (`--color-background`, `--color-primary`, `--color-toolb
 `src/lib/tokens.ts` mirrors the same values as a frozen TS object for anything that needs them in
 JS (radii, rail widths, header/tab heights).
 
-| Token | Value |
-|---|---|
+| Token                               | Value                             |
+| ----------------------------------- | --------------------------------- |
 | `background` / `surface` / `border` | `#f6f7f9` / `#ffffff` / `#e5e7eb` |
-| `foreground` / `muted` | `#111827` / `#6b7280` |
-| `primary` / `primary-hover` | `#2563eb` / `#1d4ed8` |
-| `success` / `warning` / `danger` | `#16a34a` / `#d97706` / `#dc2626` |
-| `workspace` / `toolbox` | `#eef2f6` / `#0f172a` |
+| `foreground` / `muted`              | `#111827` / `#6b7280`             |
+| `primary` / `primary-hover`         | `#2563eb` / `#1d4ed8`             |
+| `success` / `warning` / `danger`    | `#16a34a` / `#d97706` / `#dc2626` |
+| `workspace` / `toolbox`             | `#eef2f6` / `#0f172a`             |
 
 Fixed chrome dimensions: toolbox 240 px, properties 320 px, header 60 px, tabs 44 px, saved-template
 panel 280 px.
@@ -508,13 +517,13 @@ panel 280 px.
 
 `useKeyboardShortcuts` binds a single window `keydown` listener. `isMeta = metaKey || ctrlKey`.
 
-| Shortcut | Action |
-|---|---|
-| `Cmd/Ctrl + S` | Save template |
-| `Cmd/Ctrl + Z` | Undo |
-| `Cmd/Ctrl + Shift + Z` | Redo |
-| `Cmd/Ctrl + Y` | Redo |
-| `Escape` | Exit preview, else clear selection |
+| Shortcut               | Action                                                                |
+| ---------------------- | --------------------------------------------------------------------- |
+| `Cmd/Ctrl + S`         | Save template                                                         |
+| `Cmd/Ctrl + Z`         | Undo                                                                  |
+| `Cmd/Ctrl + Shift + Z` | Redo                                                                  |
+| `Cmd/Ctrl + Y`         | Redo                                                                  |
+| `Escape`               | Exit preview, else clear selection                                    |
 | `Delete` / `Backspace` | Delete selected element — skipped when focus is in an editable target |
 
 ---
@@ -548,15 +557,15 @@ Things to know that the spec documents do not reflect:
    silently to blank space.
 9. **No authentication, routing, or persistence beyond templates.** `src/app/page.tsx` renders the
    editor directly; there are no other pages or layouts.
-10. **Single-user assumptions** — the logo route writes to a shared `public/images/icon.png`, so
-    concurrent uploads overwrite each other.
+10. **Single-user assumptions** — the logo route writes to a shared `public/images/company-logo.png`,
+    so concurrent uploads overwrite each other.
 
 ---
 
 ## 16. Environment Variables
 
-| Variable | Default | Used by |
-|---|---|---|
+| Variable              | Default                     | Used by          |
+| --------------------- | --------------------------- | ---------------- |
 | `NEXT_PUBLIC_API_URL` | `http://localhost:4000/api` | `src/lib/api.ts` |
 
 It is the only environment variable read anywhere in `src/`. Both `.env.example` and `.env.local`

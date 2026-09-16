@@ -1,6 +1,6 @@
 export const COMPANY_LOGO_ID = 'image-logo'
 export const LEGACY_LOGO_ID = 'shape-logo'
-export const COMPANY_LOGO_PATH = '/images/icon.png'
+export const COMPANY_LOGO_PATH = '/images/company-logo.png'
 
 export function isCompanyLogo(elementId: string): boolean {
   return elementId === COMPANY_LOGO_ID || elementId === LEGACY_LOGO_ID
@@ -17,7 +17,7 @@ export function fileToDataUrl(file: File): Promise<string> {
 
 export async function fileToPngFile(file: File): Promise<File> {
   if (file.type === 'image/png') {
-    return new File([file], 'icon.png', { type: 'image/png' })
+    return new File([file], 'company-logo.png', { type: 'image/png' })
   }
 
   const bitmap = await createImageBitmap(file)
@@ -44,13 +44,13 @@ export async function fileToPngFile(file: File): Promise<File> {
     }, 'image/png')
   })
 
-  return new File([blob], 'icon.png', { type: 'image/png' })
+  return new File([blob], 'company-logo.png', { type: 'image/png' })
 }
 
 export async function replaceCompanyLogoFile(file: File): Promise<void> {
   const png = await fileToPngFile(file)
   const body = new FormData()
-  body.append('file', png, 'icon.png')
+  body.append('file', png, 'company-logo.png')
 
   const response = await fetch('/api/company-logo', {
     method: 'POST',

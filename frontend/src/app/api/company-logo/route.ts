@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server'
 
 const MAX_BYTES = 2 * 1024 * 1024
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47]
-const COMPANY_LOGO_PUBLIC_PATH = '/images/icon.png'
+const COMPANY_LOGO_FILE_NAME = 'company-logo.png'
+const COMPANY_LOGO_PUBLIC_PATH = `/images/${COMPANY_LOGO_FILE_NAME}`
 
 export async function POST(request: Request) {
   const formData = await request.formData()
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
 
   const directory = path.join(process.cwd(), 'public', 'images')
   await mkdir(directory, { recursive: true })
-  await writeFile(path.join(directory, 'icon.png'), bytes)
+  await writeFile(path.join(directory, COMPANY_LOGO_FILE_NAME), bytes)
 
   return NextResponse.json({ ok: true, src: COMPANY_LOGO_PUBLIC_PATH })
 }

@@ -4,6 +4,8 @@ import { COMPANY_LOGO_ID, COMPANY_LOGO_PATH } from '@/lib/company-logo'
 
 export { DOCUMENT_VERSION }
 
+const FOOTER_LOGO_PATH = '/images/footer-logo.png'
+
 export function createId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`
 }
@@ -284,9 +286,9 @@ function createDefaultElements(): DocumentElement[] {
       id: 'text-notes',
       type: 'text',
       x: 56,
-      y: 608,
+      y: 1025,
       width: 500,
-      height: 20,
+      height: 16,
       zIndex: 2,
       locked: false,
       visible: true,
@@ -300,21 +302,37 @@ function createDefaultElements(): DocumentElement[] {
       },
     },
     {
-      id: 'shape-footer',
+      id: 'shape-footer-divider',
       type: 'shape',
-      x: 620,
-      y: 1048,
-      width: 118,
-      height: 18,
+      x: 56,
+      y: 1001,
+      width: 682,
+      height: 1,
       zIndex: 1,
       locked: false,
       visible: true,
       shape: {
-        kind: 'rectangle',
-        fill: '#2563EB',
-        borderColor: '#2563EB',
-        borderWidth: 0,
-        borderRadius: 999,
+        kind: 'line',
+        fill: '#E2E8F0',
+        borderColor: '#E2E8F0',
+        borderWidth: 1,
+        borderRadius: 0,
+      },
+    },
+    {
+      id: 'image-footer',
+      type: 'image',
+      x: 638,
+      y: 1013,
+      width: 100,
+      height: 40,
+      zIndex: 1,
+      locked: false,
+      visible: true,
+      image: {
+        src: FOOTER_LOGO_PATH,
+        alt: 'Footer logo',
+        objectFit: 'cover',
       },
     },
   ]
