@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(Get-Content:*)",
+      "Shell(Get-ChildItem:*)",
+      "Shell(Select-Object:*)",
+      "powershell",
+      "Shell(npm:*)",
+      "Shell(Remove-Item:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

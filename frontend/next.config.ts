@@ -6,8 +6,10 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   distDir: ".next",
-  // Keep tracing/dev output inside this package. The parent git root would
-  // otherwise make Next create a nested frontend/frontend folder.
+  // Pin Next's workspace/tracing root to this package, which lives one level
+  // below the git root. This does NOT prevent the stray `frontend/frontend`
+  // folder: that one is emitted from stale Turbopack state inside a pre-existing
+  // `.next` directory. Delete `.next` if it ever shows up again.
   outputFileTracingRoot: projectRoot,
   serverExternalPackages: ["@react-pdf/renderer"],
   turbopack: {
