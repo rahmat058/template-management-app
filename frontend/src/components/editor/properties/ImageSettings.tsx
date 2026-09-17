@@ -1,23 +1,26 @@
 'use client'
 
-import { useState, type ChangeEvent } from 'react'
-import { IMAGE_OBJECT_FITS, type DocumentElement, type ImageObjectFit } from '@/types/element'
 import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { useEditorStore } from '@/store/editor.store'
+import { useRef, useState, type ChangeEvent } from 'react'
 import { Select, type SelectOption } from '@/components/ui/Select'
+import { SectionTitle } from '@/components/editor/properties/SectionTitle'
 import { ImageAlignControls } from '@/components/editor/properties/ImageAlignControls'
 import { PositionSizeFields } from '@/components/editor/properties/PositionSizeFields'
-import { SectionTitle } from '@/components/editor/properties/SectionTitle'
+import { IMAGE_OBJECT_FITS, type DocumentElement, type ImageObjectFit } from '@/types/element'
 import { COMPANY_LOGO_ID, fileToDataUrl, isCompanyLogo, replaceCompanyLogoFile } from '@/lib/company-logo'
-import { useEditorStore } from '@/store/editor.store'
 
 const FIT_OPTIONS: SelectOption[] = IMAGE_OBJECT_FITS.map((fit) => ({ value: fit, label: fit }))
 
 export function ImageSettings({ element }: { element: DocumentElement }) {
   const updateElement = useEditorStore((state) => state.updateElement)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isReplacing, setIsReplacing] = useState(false)
   const [replaceError, setReplaceError] = useState<string | null>(null)
   const logo = isCompanyLogo(element.id)
   const imageSrc = element.type === 'image' ? element.image.src : ''
+  const isUploadedSrc = imageSrc.startsWith('data:')
   const imageAlt = element.type === 'image' ? (element.image.alt ?? '') : 'Company logo'
   const objectFit = element.type === 'image' ? element.image.objectFit : 'cover'
 
@@ -79,28 +82,32 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
       <section className="border-border rounded-xl border p-3">
         <SectionTitle title={logo ? 'Company Logo' : 'Image Settings'} />
         <div className="mt-3 flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-muted text-[12px] font-medium">{logo ? 'Replace logo' : 'Replace image'}</span>
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isReplacing}
+              onClick={(event) => {
+                event.stopPropagation()
+                fileInputRef.current?.click()
+              }}>
+              {logo ? 'Replace logo' : 'Replace image'}
+            </Button>
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
-              disabled={isReplacing}
-              onClick={(event) => event.stopPropagation()}
+              className="hidden"
               onChange={(event) => void handleFileChange(event)}
-              className="text-muted file:border-primary/20 file:bg-primary/5 file:text-primary block w-full cursor-pointer text-[12px] file:mr-3 file:h-8 file:cursor-pointer file:rounded-lg file:border file:px-3 file:text-[12px] file:font-medium disabled:cursor-not-allowed"
             />
-          </label>
+          </div>
           {isReplacing ? <p className="text-muted text-[12px]">Replacing image…</p> : null}
           {replaceError ? <p className="text-danger text-[12px]">{replaceError}</p> : null}
           <Input
             label="Image URL"
-            value={imageSrc.startsWith('data:') ? 'Uploaded image' : imageSrc}
-            readOnly={imageSrc.startsWith('data:')}
-            onChange={(event) => {
-              if (!imageSrc.startsWith('data:')) {
-                applySrc(event.target.value)
-              }
-            }}
+            value={isUploadedSrc ? '' : imageSrc}
+            placeholder={isUploadedSrc ? 'Uploaded image — paste a URL to replace it' : 'https://example.com/image.png'}
+            onChange={(event) => applySrc(event.target.value)}
           />
           <Input
             label="Alt text"
