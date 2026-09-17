@@ -137,16 +137,19 @@ frontend/
 layout.tsx (server)
   └─ Providers            React Query client, created once per mount
        └─ page.tsx        <EditorShell />
-            └─ EditorShell (client)
-                 1. useHasMounted()          SSR-safe mount flag, gates DnD
-                 2. useHydrateTemplate1()    GET /templates/by-name/template1
+             └─ EditorShell (client)
+                 1. useHasMounted()          SSR-safe mount flag, gates DnD and the skeleton
+                 2. useHydrateTemplate1()    GET /templates/by-name/template1 (in background)
                  3. editorStore.hydrateFromTemplate(template)
 ```
 
 1. **`Providers`** wraps the app in a single `QueryClientProvider`. There is no theme provider,
    no auth provider, and no Zustand provider — the stores are module-level singletons.
-2. **`EditorShell`** renders a skeleton (`EditorShellFallback`) until both the mount flag is `true`
-   and the hydration query has settled.
+2. **`EditorShell`** renders a skeleton (`EditorShellFallback`) until the mount flag is `true`. The
+   editor's **first paint is not gated on the template fetch**: the store is always seeded with a
+   complete untitled tab, so the editor renders immediately and `template1` hydrates in the
+   background once its query settles. Blocking the first paint on that request meant a slow or
+   unreachable API held the "Loading template…" screen open for as long as the request took.
 3. **`useHydrateTemplate1`** fetches the template named `template1` (`AUTOLOAD_TEMPLATE_NAME`) with
    `retry: false`, then calls `hydrateFromTemplate` **once** from a `useLayoutEffect` guarded by a ref.
 4. Hydration is a **no-op unless the store holds exactly one tab and that tab is a pristine
@@ -408,11 +411,16 @@ All panels commit through `updateElement(id, updater, historyKey?)`.
 
 Base URL: `process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api"`.
 
-A single internal `request<T>()` helper prefixes the base URL, sets `Content-Type: application/json`,
-returns `undefined` for `204`, unwraps the `{ success: true, data }` envelope on success (rejecting a
-body without the flag), and throws
+A single internal `request<T>()` helper prefixes the base URL, returns `undefined` for `204`, unwraps
+the `{ success: true, data }` envelope on success (rejecting a body without the flag), and throws
 `ApiClientError { message, status, code, details }` parsed from the backend
 `{ success: false, error: { message, code, details } }` shape.
+
+It sets `Content-Type: application/json` **only when the request has a body**. Declaring it on a
+bodyless request (the GETs, and `DELETE`) promotes it from a CORS _simple request_ to one that
+requires a preflight, so every such call would pay an extra `OPTIONS` round trip before the real
+request — a cost that only shows up when the API is on another origin, which is the normal
+production deployment.
 
 | `api` method                | HTTP   | Path                                      |
 | --------------------------- | ------ | ----------------------------------------- |
@@ -441,16 +449,16 @@ and any detail views.
 
 ### Hooks
 
-| Hook                   | Behaviour                                                      |
-| ---------------------- | -------------------------------------------------------------- |
-| `useTemplates`         | List query                                                     |
-| `useTemplate(id)`      | Detail query, `enabled: Boolean(id)`                           |
-| `useHydrateTemplate1`  | Autoload `template1` once, exposes `{ isReady, error, retry }` |
-| `useSaveTemplate`      | Mutation: PATCH when the tab has a `templateId`, else POST     |
-| `useExportPdf`         | `{ exportPdf, isExporting, error }`                            |
-| `useEditorSelection`   | The selected element from the active tab/page                  |
-| `useKeyboardShortcuts` | Window-level key bindings                                      |
-| `useHasMounted`        | SSR-safe mount flag                                            |
+| Hook                   | Behaviour                                                           |
+| ---------------------- | ------------------------------------------------------------------- |
+| `useTemplates`         | List query                                                          |
+| `useTemplate(id)`      | Detail query, `enabled: Boolean(id)`                                |
+| `useHydrateTemplate1`  | Autoloads `template1` in the background, exposes `{ error, retry }` |
+| `useSaveTemplate`      | Mutation: PATCH when the tab has a `templateId`, else POST          |
+| `useExportPdf`         | `{ exportPdf, isExporting, error }`                                 |
+| `useEditorSelection`   | The selected element from the active tab/page                       |
+| `useKeyboardShortcuts` | Window-level key bindings                                           |
+| `useHasMounted`        | SSR-safe mount flag                                                 |
 
 `useSaveTemplate` drives the whole save lifecycle. `mutationFn` resolves the active tab **once**,
 saves it, and returns `{ template, tabId }`; `onMutate` → UI status `saving`; `onSuccess` →

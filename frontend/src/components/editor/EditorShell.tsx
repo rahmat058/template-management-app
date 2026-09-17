@@ -15,10 +15,10 @@ import { useEditorStore } from '@/store/editor.store'
 export function EditorShell() {
   useKeyboardShortcuts()
   const hasMounted = useHasMounted()
-  const { isReady, error, retry } = useHydrateTemplate1()
+  const { error, retry } = useHydrateTemplate1()
   const mode = useEditorStore((state) => state.mode)
 
-  if (!hasMounted || !isReady) {
+  if (!hasMounted) {
     return <EditorShellFallback />
   }
 

@@ -6,7 +6,6 @@ import { AUTOLOAD_TEMPLATE_NAME } from '@/lib/templates'
 import { useEditorStore } from '@/store/editor.store'
 
 export function useHydrateTemplate1(): {
-  isReady: boolean
   error: string | null
   retry: () => void
 } {
@@ -35,7 +34,6 @@ export function useHydrateTemplate1(): {
     : null
 
   return {
-    isReady: query.isFetched,
     error,
     retry: () => {
       void query.refetch()

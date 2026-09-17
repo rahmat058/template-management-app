@@ -17,11 +17,14 @@ Local setup and scripts: **[README.md](./README.md)**. Repo overview: **[../READ
      ▼
   app/page.tsx ──► <EditorShell />            ← the only page
      │
-     ├── useHasMounted()          SSR-safe mount flag, gates drag handlers
-     └── useHydrateTemplate1()    GET /templates/by-name/template1
+     ├── useHasMounted()          SSR-safe mount flag, gates drag handlers + skeleton
+     └── useHydrateTemplate1()    GET /templates/by-name/template1  (background, non-blocking)
                                       │
                                       ▼
                               editorStore.hydrateFromTemplate()
+
+  The editor paints as soon as it has mounted — the store is always seeded with a complete
+  untitled tab — so the `template1` request never holds up the first render.
 
   edit mode                          preview mode
   ┌─────────────┬──────────┬─────────────┐        ┌─────────────────────┐
@@ -153,16 +156,16 @@ templateKeys = {
 }
 ```
 
-| Hook                   | Behaviour                                                       |
-| ---------------------- | --------------------------------------------------------------- |
-| `useTemplates`         | List query                                                      |
-| `useTemplate(id)`      | Detail query, `enabled: Boolean(id)`                            |
-| `useHydrateTemplate1`  | Autoloads `template1` once; exposes `{ isReady, error, retry }` |
-| `useSaveTemplate`      | PATCH when the tab has a `templateId`, else POST                |
-| `useExportPdf`         | `{ exportPdf, isExporting, error }`                             |
-| `useEditorSelection`   | Selected element of the active tab/page                         |
-| `useKeyboardShortcuts` | Window-level key bindings                                       |
-| `useHasMounted`        | `useSyncExternalStore` mount flag                               |
+| Hook                   | Behaviour                                                           |
+| ---------------------- | ------------------------------------------------------------------- |
+| `useTemplates`         | List query                                                          |
+| `useTemplate(id)`      | Detail query, `enabled: Boolean(id)`                                |
+| `useHydrateTemplate1`  | Autoloads `template1` in the background; exposes `{ error, retry }` |
+| `useSaveTemplate`      | PATCH when the tab has a `templateId`, else POST                    |
+| `useExportPdf`         | `{ exportPdf, isExporting, error }`                                 |
+| `useEditorSelection`   | Selected element of the active tab/page                             |
+| `useKeyboardShortcuts` | Window-level key bindings                                           |
+| `useHasMounted`        | `useSyncExternalStore` mount flag                                   |
 
 Defaults are `staleTime: 30_000`, `retry: 1`, no refetch on window focus, no mutation retry. Because `detail` and `all` share the `['templates']` prefix, invalidating `all` refreshes both list and detail.
 
