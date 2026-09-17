@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 import type { Page } from '@/types/document'
-import type { DocumentElement } from '@/types/element'
-import { DEFAULT_TAB_NAME } from '@/lib/templates'
 import type { Template } from '@/types/template'
+import { findPage } from '@/lib/document-utils'
+import { DEFAULT_TAB_NAME } from '@/lib/templates'
+import type { DocumentElement } from '@/types/element'
+import { footerElementsForNewPage } from '@/lib/footer'
 import { createDefaultPages, createId, createPage, DOCUMENT_VERSION } from '@/lib/default-document'
 import { emptyHistory, uniqueHistoryKey, undoTab, redoTab, withHistory, type TabHistory } from '@/lib/editor-history'
 
@@ -275,8 +277,10 @@ export const useEditorStore = create<EditorState>((set, get) => {
     addPage: () => {
       set((state) => ({
         tabs: mutateActiveTab(state.tabs, state.activeTabId, uniqueHistoryKey('add-page', 'page'), (tab) => {
+          const source = findPage(tab.document.pages, tab.activePageId)
           const page = createPage({
             order: tab.document.pages.length,
+            elements: source ? footerElementsForNewPage(source) : [],
           })
 
           return {

@@ -1,5 +1,5 @@
-import { createId } from '@/lib/default-document'
 import type { Page } from '@/types/document'
+import { createId } from '@/lib/default-document'
 import type { DocumentElement, ImageElement, ShapeElement, TableElement, TextElement } from '@/types/element'
 
 export function createTextElement(
@@ -130,6 +130,24 @@ export function createShapeElement(
       ...shape,
     },
   }
+}
+
+export function cloneElement(element: DocumentElement): DocumentElement {
+  const clone = structuredClone(element)
+  clone.id = createId(element.type)
+
+  if (clone.type === 'table') {
+    clone.table = {
+      ...clone.table,
+      rows: clone.table.rows.map((row) => ({
+        ...row,
+        id: createId('row'),
+        cells: row.cells.map((cell) => ({ ...cell, id: createId('cell') })),
+      })),
+    }
+  }
+
+  return clone
 }
 
 export function nextElementOffset(elementCount: number): { x: number; y: number } {

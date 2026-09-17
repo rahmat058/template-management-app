@@ -265,6 +265,9 @@ Behavioural details worth knowing:
   id**, never on whichever tab happens to be active when the save resolves.
 - `moveElement` clamps to `[0, page.width - element.width]` and rounds.
 - Any mutation touching pages goes through `updateActivePage`, which always sets `isDirty: true`.
+- `addPage` appends a page that inherits the **footer** of the page you were viewing: every element whose
+  top edge lands in the last 150px of the page (`lib/footer.ts`), cloned with fresh ids so each page's
+  footer is edited independently.
 
 ### `history.store.ts`
 

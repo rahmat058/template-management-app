@@ -106,6 +106,8 @@ An `EditorTab` carries `id`, `name`, `templateId`, `document` (`pages` + `versio
 | Elements     | `selectElement`, `addElement`, `moveElement`, `resizeElement`, `updateElement`, `updatePage`, `removeSelectedElement` |
 | History      | `undo`, `redo`                                                                                                        |
 
+`addPage` appends a page that inherits the **footer** of the page you were viewing — every element whose top edge lands in the last 150px of the page (`lib/footer.ts`), cloned with fresh ids so each page's footer is edited independently.
+
 **Undo/redo** (`lib/editor-history.ts`) is per tab and in memory:
 
 ```
