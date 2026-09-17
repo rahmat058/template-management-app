@@ -2,6 +2,7 @@ import { env } from './config/env'
 import { createApp } from './app'
 import { connectWithRetry } from './lib/db-retry'
 import { disconnectDatabase } from './config/db'
+import { resolvePublicUrl } from './lib/public-url'
 
 // Long enough to drain in-flight requests, short enough that the orchestrator's SIGKILL is never
 // what ends the process — that would abandon the acks still in the pool.
@@ -13,7 +14,7 @@ async function bootstrap(): Promise<void> {
   const app = createApp()
 
   const server = app.listen(env.PORT, () => {
-    console.log(`🚀 API listening on http://localhost:${env.PORT}`)
+    console.log(`🚀 API listening on ${resolvePublicUrl(env.PORT)}`)
   })
 
   // Node's defaults are 60 s / 5 s / 300 s. Set explicitly so the behaviour cannot change silently
