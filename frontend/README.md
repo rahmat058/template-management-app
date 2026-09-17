@@ -11,6 +11,8 @@ The app talks to the Express API in **[../backend](../backend/README.md)** over 
 
 Deep dive: **[ARCHITECTURE.md](./ARCHITECTURE.md)** · Repo overview: **[../README.md](../README.md)**
 
+Live: **[template-management-app-gamma.vercel.app](https://template-management-app-gamma.vercel.app/)** (Vercel), calling the Render API at `https://api-template-management.onrender.com/api`.
+
 ## Features
 
 | Area                  | Description                                                                      |

@@ -13,6 +13,21 @@ Frontend: **[frontend/README.md](./frontend/README.md)** · Backend: **[backend/
 
 Specs: **[docs/PRD.md](./docs/PRD.md)** · Design system: **[docs/design.md](./docs/design.md)** · Data model: **[docs/database-schema.md](./docs/database-schema.md)**
 
+## Live Deployment
+
+| Service  | URL                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| Frontend | **[template-management-app-gamma.vercel.app](https://template-management-app-gamma.vercel.app/)** |
+| Backend  | **[api-template-management.onrender.com](https://api-template-management.onrender.com)**          |
+
+The editor is served by Vercel and calls the Render API. Check the deployment with:
+
+```bash
+curl https://api-template-management.onrender.com/api/health
+```
+
+It returns `200` with `"database": "connected"` when MongoDB is reachable, and `503` when it is not. Render suspends idle free instances, so the first request after a pause can take a minute to wake the API.
+
 ## Features
 
 | Area           | Description                                                                   |

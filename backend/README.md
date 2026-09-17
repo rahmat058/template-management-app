@@ -11,6 +11,8 @@ The editor in **[../frontend](../frontend/README.md)** is the only client. All r
 
 Deep dive: **[ARCHITECTURE.md](./ARCHITECTURE.md)** · Repo overview: **[../README.md](../README.md)**
 
+Live: **[api-template-management.onrender.com](https://api-template-management.onrender.com)** (Render) — health at **[/api/health](https://api-template-management.onrender.com/api/health)**.
+
 ## Tech Stack
 
 <div>
