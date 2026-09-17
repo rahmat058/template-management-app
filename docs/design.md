@@ -50,20 +50,20 @@ No `any` types.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Header: Template name | Undo | Redo | Preview | Save | Download PDF │
+│ Header: Template name | Undo | Redo | Preview | Save | Download PDF  │
 ├──────────────────────────────────────────────────────────────────────┤
 │ Template Tabs: [New-Template] [Template-1] [+]                       │
 ├───────────────┬─────────────────────────────────┬────────────────────┤
 │               │                                 │                    │
-│   TOOLBOX     │          DOCUMENT CANVAS       │    PROPERTIES      │
+│   TOOLBOX     │          DOCUMENT CANVAS        │    PROPERTIES      │
 │               │                                 │                    │
-│ Text          │       ┌─────────────────┐      │ Text Settings      │
-│ Table         │       │                 │      │ Font               │
-│ Image         │       │   Document      │      │ Size               │
-│ Shape         │       │     Page        │      │ Weight             │
-│               │       │                 │      │ Color              │
-│ + Table       │       │                 │      │ Alignment          │
-│ + Text Line   │       └─────────────────┘      │                    │
+│ Text          │       ┌─────────────────┐       │ Text Settings      │
+│ Table         │       │                 │       │ Font               │
+│ Image         │       │   Document      │       │ Size               │
+│ Shape         │       │     Page        │       │ Weight             │
+│               │       │                 │       │ Color              │
+│ + Table       │       │                 │       │ Alignment          │
+│ + Text Line   │       └─────────────────┘       │                    │
 │               │                                 │ Table Settings     │
 │ Pages         │                                 │ Width              │
 │ [thumb]       │                                 │ Borders            │
