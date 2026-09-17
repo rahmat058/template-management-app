@@ -87,7 +87,7 @@ export function ImageSettings({ element }: { element: DocumentElement }) {
               disabled={isReplacing}
               onClick={(event) => event.stopPropagation()}
               onChange={(event) => void handleFileChange(event)}
-              className="text-muted file:border-primary/20 file:bg-primary/5 file:text-primary block w-full text-[12px] file:mr-3 file:h-8 file:rounded-lg file:border file:px-3 file:text-[12px] file:font-medium"
+              className="text-muted file:border-primary/20 file:bg-primary/5 file:text-primary block w-full cursor-pointer text-[12px] file:mr-3 file:h-8 file:cursor-pointer file:rounded-lg file:border file:px-3 file:text-[12px] file:font-medium disabled:cursor-not-allowed"
             />
           </label>
           {isReplacing ? <p className="text-muted text-[12px]">Replacing image…</p> : null}
