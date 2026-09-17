@@ -14,8 +14,8 @@ Local setup and troubleshooting: **[README.md](./README.md)**. Repo overview: **
        ▼
   ┌─────────────────────────────────────────────────────────────┐
   │  Express app                                                │
-  │  helmet → cors → requestId → compression → rateLimit        │
-  │         → json(2mb) → urlencoded → morgan                   │
+  │  helmet → requestId → morgan → cors → compression           │
+  │         → rateLimit → json(2mb) → urlencoded                │
   │         → /api router → 404 → errorHandler                  │
   └─────────────────────────────────────────────────────────────┘
        │
@@ -58,11 +58,14 @@ backend/
 │   │   ├── env.ts           # dotenv + Zod validation of process.env
 │   │   └── db.ts            # mongoose.connect, DNS + driver options
 │   ├── lib/
-│   │   ├── app-error.ts     # AppError + NotFound / Validation / Conflict
-│   │   ├── async-handler.ts # forwards async rejections to next()
-│   │   ├── db-retry.ts      # connectDatabase with linear backoff
-│   │   ├── http.ts          # sendSuccess / sendError / sendNoContent
-│   │   └── wait.ts          # setTimeout as a promise
+│   │   ├── app-error.ts      # AppError + NotFound / Validation / Conflict
+│   │   ├── async-handler.ts  # forwards async rejections to next()
+│   │   ├── db-retry.ts       # connectDatabase with linear backoff
+│   │   ├── http.ts           # sendSuccess / sendError / sendNoContent
+│   │   ├── log-format.ts     # the one morgan line format, per environment
+│   │   ├── public-url.ts     # RENDER_EXTERNAL_URL, else localhost, for the boot log
+│   │   ├── request-logger.ts # morgan middleware: format from the environment, off under test
+│   │   └── wait.ts           # setTimeout as a promise
 │   ├── middleware/
 │   │   ├── validate-request.ts   # Zod parse into req.body/params/query
 │   │   ├── not-found.ts          # unmatched route → 404
@@ -117,13 +120,13 @@ The HTTP status code stays on the status line and is never echoed in the body, s
 request
    │
    ├─ helmet            security headers
-   ├─ cors              origin CORS_ORIGIN, methods GET/POST/PATCH/DELETE/OPTIONS, exposes X-Request-Id
    ├─ requestId         reuses a safe inbound X-Request-Id, else randomUUID; echoes it back
+   ├─ morgan            same line format everywhere, request id appended in brackets
+   ├─ cors              origin CORS_ORIGIN, methods GET/POST/PATCH/DELETE/OPTIONS, exposes X-Request-Id
    ├─ compression       gzip/brotli — template JSON is highly repetitive
    ├─ rateLimit         120 requests / 60s, in-process, health checks skipped
    ├─ express.json      limit 2mb
    ├─ express.urlencoded
-   ├─ morgan            same line format everywhere, request id appended in brackets
    │
    ├─ /api router
    │     ├─ validateRequest({ params, body })   Zod parse → 400 on failure
@@ -137,9 +140,11 @@ request
 
 The rate limiter runs **before** the body parsers so a request is counted before the server spends
 work parsing up to 2 MB for it, and `/api/health` is skipped so load-balancer probes never consume
-the shared quota. `requestId` runs early so every later layer — including `morgan` and the error
-handler — can log the same id. `app.set('trust proxy', TRUST_PROXY)` is what makes `req.ip` (and
-therefore the limiter and the logs) see the real client behind a proxy.
+the shared quota. `requestId` and `morgan` run ahead of `cors` and the limiter so every later layer —
+including the error handler — can log the same id, and so a request that `cors` or the limiter ends
+itself (a `204` preflight, a `429`) still appears in the log; a request that never reaches `morgan`
+is never recorded. `app.set('trust proxy', TRUST_PROXY)` is what makes `req.ip` (and therefore the
+limiter and the logs) see the real client behind a proxy.
 
 `asyncHandler` exists because Express 4 does not catch rejected promises; every async controller is wrapped so failures reach `errorHandler` instead of hanging the request.
 
@@ -262,18 +267,18 @@ already failed.
 
 ## Cross-cutting concerns
 
-| Topic                | Implementation                                                                                                 |
-| -------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Security headers** | `helmet`, with `x-powered-by` disabled                                                                         |
-| **CORS**             | Single configured origin; explicit method and header allowlists; 24 h preflight cache                          |
-| **Body size**        | `express.json({ limit: '2mb' })`, mapped to `413` rather than `500`                                            |
-| **Rate limiting**    | `express-rate-limit`, 120 requests/minute, before the body parsers, health checks skipped                      |
-| **Compression**      | `compression` on every response — template JSON compresses 80–90%                                              |
-| **Logging**          | `morgan`, request id appended to every line (`remote-addr` prefixed in production); errors via `console.error` |
-| **Correlation**      | `X-Request-Id` accepted when safe, generated otherwise, echoed and logged                                      |
-| **Validation**       | Zod at the boundary, reusing the same bounds the editor enforces                                               |
-| **Health**           | `/api/health` reports Mongo `readyState`, not just process liveness                                            |
-| **Shutdown**         | Signals and `uncaughtException` drain, close Mongo, then exit                                                  |
+| Topic                | Implementation                                                                                                                                                        |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Security headers** | `helmet`, with `x-powered-by` disabled                                                                                                                                |
+| **CORS**             | Single configured origin; explicit method and header allowlists; 24 h preflight cache                                                                                 |
+| **Body size**        | `express.json({ limit: '2mb' })`, mapped to `413` rather than `500`                                                                                                   |
+| **Rate limiting**    | `express-rate-limit`, 120 requests/minute, before the body parsers, health checks skipped                                                                             |
+| **Compression**      | `compression` on every response — template JSON compresses 80–90%                                                                                                     |
+| **Logging**          | `lib/request-logger.ts` builds the `morgan` middleware — one line format everywhere, `remote-addr` prefixed in production, off under test; errors via `console.error` |
+| **Correlation**      | `X-Request-Id` accepted when safe, generated otherwise, echoed and logged                                                                                             |
+| **Validation**       | Zod at the boundary, reusing the same bounds the editor enforces                                                                                                      |
+| **Health**           | `/api/health` reports Mongo `readyState`, not just process liveness                                                                                                   |
+| **Shutdown**         | Signals and `uncaughtException` drain, close Mongo, then exit                                                                                                         |
 
 Zod constraints mirror the editor's limits — for example `table.rows[].cells.length` must equal `table.columns`, and each page accepts at most 500 elements.
 
@@ -289,6 +294,7 @@ Zod constraints mirror the editor's limits — for example `table.rows[].cells.l
 | Error taxonomy         | `lib/app-error.ts`           | Failures carry status, code, and details                             |
 | Single response helper | `lib/http.ts`                | One success/error/`204` envelope across every handler                |
 | Async wrapper          | `lib/async-handler.ts`       | Applies catch-all forwarding uniformly                               |
+| Request logger         | `lib/request-logger.ts`      | Environment picks the format; `null` under test                      |
 | Schema-first config    | `config/env.ts`              | Invalid environment fails fast at boot                               |
 
 ---

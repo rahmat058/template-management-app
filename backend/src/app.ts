@@ -1,24 +1,32 @@
-import compression from 'compression'
 import cors from 'cors'
 import helmet from 'helmet'
-import morgan from 'morgan'
 import express from 'express'
+import compression from 'compression'
 import rateLimit from 'express-rate-limit'
 
 import { env } from './config/env'
-import { PRODUCTION_LOG_FORMAT, REQUEST_LOG_FORMAT } from './lib/log-format'
 import { apiRouter } from './routes'
+import { requestLogger } from './lib/request-logger'
 import { errorHandler } from './middleware/error-handler'
 import { notFoundHandler } from './middleware/not-found'
-import { REQUEST_ID_HEADER, requestId, requestIdOf } from './middleware/request-id'
+import { REQUEST_ID_HEADER, requestId } from './middleware/request-id'
 
 export function createApp() {
   const app = express()
 
   app.disable('x-powered-by')
+
   // Needed for correct client IPs (and therefore correct rate limiting and logs) behind a proxy.
   app.set('trust proxy', env.TRUST_PROXY)
   app.use(helmet())
+  app.use(requestId)
+
+  // Registered ahead of CORS and the rate limiter, which can each end a request (204, 429) before morgan runs.
+  const requestLog = requestLogger(env.NODE_ENV)
+  if (requestLog) {
+    app.use(requestLog)
+  }
+
   app.use(
     cors({
       origin: env.CORS_ORIGIN,
@@ -28,7 +36,6 @@ export function createApp() {
       maxAge: 86_400,
     }),
   )
-  app.use(requestId)
   app.use(compression())
   // Ahead of the body parsers so a request is counted before the server parses up to 2 MB for it.
   // Health checks are skipped so load-balancer probes do not consume the shared quota.
@@ -43,11 +50,6 @@ export function createApp() {
   )
   app.use(express.json({ limit: '2mb' }))
   app.use(express.urlencoded({ extended: false }))
-
-  if (env.NODE_ENV !== 'test') {
-    morgan.token('requestId', (_req, res) => requestIdOf(res))
-    app.use(morgan(env.NODE_ENV === 'production' ? PRODUCTION_LOG_FORMAT : REQUEST_LOG_FORMAT))
-  }
 
   app.use('/api', apiRouter)
   app.use(notFoundHandler)

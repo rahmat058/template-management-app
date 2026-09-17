@@ -167,10 +167,10 @@ The health route returns `503` with `"status": "degraded"` when the database is 
 
 ```text
 src/
-├── app.ts                 Express app (helmet, CORS, request id, compression, rate limit, JSON)
+├── app.ts                 Express app (helmet, request id, logging, CORS, compression, rate limit, JSON)
 ├── server.ts              Database connect + HTTP listen, timeouts, graceful shutdown
 ├── config/                Env validation and MongoDB connection
-├── lib/                   AppError, async handler, response helpers
+├── lib/                   AppError, async handler, response helpers, request logger
 ├── middleware/            Request id, validation, 404, and error handler
 ├── models/                Mongoose Template schema
 ├── scripts/               Duplicate pre-check + explicit index sync
@@ -186,7 +186,7 @@ src/
 ## How it works
 
 - `server.ts` retries the initial MongoDB connection up to 8 times before giving up. On `SIGINT`/`SIGTERM` it stops accepting connections, lets in-flight requests finish, closes the Mongo pool, and exits; unhandled rejections are logged without exiting, and an uncaught exception drains and exits.
-- `app.ts` applies helmet, CORS, a request id, compression, a 120 requests/minute rate limit, the 2 MB JSON parsers, and request logging before the `/api` router.
+- `app.ts` applies helmet, a request id, request logging, CORS, compression, a 120 requests/minute rate limit, and the 2 MB JSON parsers before the `/api` router. Logging sits above CORS and the limiter so preflights (`204`) and rate-limited requests (`429`) are logged too.
 - Every response carries an `X-Request-Id` header — the inbound one when it is a safe token, otherwise a generated UUID — and a `500` logs the same id, so a reported error can be traced back to its request.
 - Each route declares its own Zod validation, so an invalid body or id is rejected with `400` before any handler runs.
 - Controllers stay thin: they call the service and hand the result to a mapper that converts `_id` to `id` and dates to ISO strings. Reads use `.lean()` and the list endpoint aggregates `pageCount` in MongoDB, so pages and elements are never fetched just to be counted.
