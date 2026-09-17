@@ -6,12 +6,11 @@ import express from 'express'
 import rateLimit from 'express-rate-limit'
 
 import { env } from './config/env'
+import { PRODUCTION_LOG_FORMAT, REQUEST_LOG_FORMAT } from './lib/log-format'
 import { apiRouter } from './routes'
 import { errorHandler } from './middleware/error-handler'
 import { notFoundHandler } from './middleware/not-found'
 import { REQUEST_ID_HEADER, requestId, requestIdOf } from './middleware/request-id'
-
-const PRODUCTION_LOG_FORMAT = ':requestId :remote-addr :method :url :status :res[content-length] - :response-time ms'
 
 export function createApp() {
   const app = express()
@@ -47,7 +46,7 @@ export function createApp() {
 
   if (env.NODE_ENV !== 'test') {
     morgan.token('requestId', (_req, res) => requestIdOf(res))
-    app.use(morgan(env.NODE_ENV === 'production' ? PRODUCTION_LOG_FORMAT : 'dev'))
+    app.use(morgan(env.NODE_ENV === 'production' ? PRODUCTION_LOG_FORMAT : REQUEST_LOG_FORMAT))
   }
 
   app.use('/api', apiRouter)

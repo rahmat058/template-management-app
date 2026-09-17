@@ -123,7 +123,7 @@ request
    ├─ rateLimit         120 requests / 60s, in-process, health checks skipped
    ├─ express.json      limit 2mb
    ├─ express.urlencoded
-   ├─ morgan            'dev' locally, request-id format in production (skipped in test)
+   ├─ morgan            same line format everywhere, request id appended in brackets
    │
    ├─ /api router
    │     ├─ validateRequest({ params, body })   Zod parse → 400 on failure
@@ -262,18 +262,18 @@ already failed.
 
 ## Cross-cutting concerns
 
-| Topic                | Implementation                                                                            |
-| -------------------- | ----------------------------------------------------------------------------------------- |
-| **Security headers** | `helmet`, with `x-powered-by` disabled                                                    |
-| **CORS**             | Single configured origin; explicit method and header allowlists; 24 h preflight cache     |
-| **Body size**        | `express.json({ limit: '2mb' })`, mapped to `413` rather than `500`                       |
-| **Rate limiting**    | `express-rate-limit`, 120 requests/minute, before the body parsers, health checks skipped |
-| **Compression**      | `compression` on every response — template JSON compresses 80–90%                         |
-| **Logging**          | `morgan` per environment with the request id; unexpected errors via `console.error`       |
-| **Correlation**      | `X-Request-Id` accepted when safe, generated otherwise, echoed and logged                 |
-| **Validation**       | Zod at the boundary, reusing the same bounds the editor enforces                          |
-| **Health**           | `/api/health` reports Mongo `readyState`, not just process liveness                       |
-| **Shutdown**         | Signals and `uncaughtException` drain, close Mongo, then exit                             |
+| Topic                | Implementation                                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Security headers** | `helmet`, with `x-powered-by` disabled                                                                         |
+| **CORS**             | Single configured origin; explicit method and header allowlists; 24 h preflight cache                          |
+| **Body size**        | `express.json({ limit: '2mb' })`, mapped to `413` rather than `500`                                            |
+| **Rate limiting**    | `express-rate-limit`, 120 requests/minute, before the body parsers, health checks skipped                      |
+| **Compression**      | `compression` on every response — template JSON compresses 80–90%                                              |
+| **Logging**          | `morgan`, request id appended to every line (`remote-addr` prefixed in production); errors via `console.error` |
+| **Correlation**      | `X-Request-Id` accepted when safe, generated otherwise, echoed and logged                                      |
+| **Validation**       | Zod at the boundary, reusing the same bounds the editor enforces                                               |
+| **Health**           | `/api/health` reports Mongo `readyState`, not just process liveness                                            |
+| **Shutdown**         | Signals and `uncaughtException` drain, close Mongo, then exit                                                  |
 
 Zod constraints mirror the editor's limits — for example `table.rows[].cells.length` must equal `table.columns`, and each page accepts at most 500 elements.
 
